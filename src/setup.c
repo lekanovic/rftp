@@ -4,11 +4,14 @@
 #include <netinet/in.h>
 #include <pthread.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 
 #include "parser.h"
 
 #define THREADS	20
+
+static int sfd;
 
 void* connection(void* argument)
 {
@@ -27,7 +30,7 @@ void* connection(void* argument)
 
 int start_server()
 {
-	int sfd,client_sfd,i=0;
+	int client_sfd,i=0;
 	int addrlen;
 	struct sockaddr_in address;
 	char buf[1024];
@@ -56,5 +59,10 @@ int start_server()
 	close(sfd);
 }
 
+void close_server()
+{
+	close(sfd);
+	exit(1);
+}
 
 
