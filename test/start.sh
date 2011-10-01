@@ -1,0 +1,12 @@
+./connect.py dej &
+./connect.py pej &
+./connect.py sej &
+./connect.py fej &
+./connect.py nej &
+./connect.py qej &
+./connect.py wej &
+./connect.py rej &
+./connect.py tej &
+./connect.py yej &
+./connect.py lej &
+./connect.py bej &
