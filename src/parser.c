@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -6,6 +7,8 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <dirent.h>
+#include <arpa/inet.h>
+#include "parser.h"
 /* CR \r
  * LF \n
  */
@@ -15,6 +18,8 @@
 #define PWD_OK	"257 /radde/padde\r\n"
 #define OPEN_ASCII_MODE	"150 Opening ASCII mode data connection for file list\r\n"
 #define GOODBYE	"221 Goodbye\r\n"
+
+static int parse_msg(int,char*);
 
 static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
 {
@@ -70,7 +75,7 @@ int handle_msg(int client_sfd)
 }
 int port_fd;
 
-int parse_msg(int client_sfd,char* msg)
+static int parse_msg(int client_sfd,char* msg)
 {
 	if (strstr(msg,"?") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);

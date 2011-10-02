@@ -12,10 +12,11 @@ void handler(int sig)
 	close_server();
 }
 
-void main()
+int main()
 {
 	signal(SIGINT, handler);
 	start_server();
+	return 0;
 }
 
 

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Iinc -pthread
+CFLAGS=-Iinc -pthread -Werror -Wall
 SRC=src/main.o \
     src/setup.o \
     src/parser.o

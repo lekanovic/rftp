@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "parser.h"
 
@@ -16,7 +17,6 @@ static int sfd;
 void* connection(void* argument)
 {
 	int client_sfd;
-	char buf[1024];
 
 	client_sfd = *((int*)argument);
 	printf("new client, sock =%d\n",client_sfd);
@@ -31,9 +31,8 @@ void* connection(void* argument)
 int start_server()
 {
 	int client_sfd,i=0;
-	int addrlen;
+	socklen_t addrlen;
 	struct sockaddr_in address;
-	char buf[1024];
 	pthread_t threads[THREADS];
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
