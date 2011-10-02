@@ -14,8 +14,7 @@
  */
 #define WELCOME_MSG	"220 Raddes ftp server beta v1.0\r\n"
 #define LOGIN_MSG	"331 Anonymous access allowed\r\n"
-#define SYSTEM_TYPE	"211 Ubuntu 11.04 Intel Core i7\r\n"
-#define PWD_OK	"257 /radde/padde\r\n"
+#define SYSTEM_TYPE	"215 LINUX-2.6\r\n"
 #define OPEN_ASCII_MODE	"150 Opening ASCII mode data connection for file list\r\n"
 #define GOODBYE	"221 Goodbye\r\n"
 
