@@ -9,6 +9,7 @@
 
 static int get_all_posts(struct user*);
 
+
 /*
  * @param u - adds an new user to passwd file
  * @return - true if user added, false otherwise
@@ -48,6 +49,7 @@ static int get_all_posts(struct user* user_list)
 	fclose(file);
 	return i;
 }
+
 /*
  * @param name - remove user with name from passwd file
  * @return - no comment
@@ -134,6 +136,7 @@ int get_passwd(struct user* u2)
 	fclose(file);
 	return ret;
 }
+
 /*
  * @param name - user to be tested for password
  * @param passwd - match this passwd from the passwd file
