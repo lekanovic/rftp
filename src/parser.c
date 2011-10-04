@@ -16,6 +16,7 @@
 #define LOGIN_MSG	"331 Anonymous access allowed\r\n"
 #define SYSTEM_TYPE	"215 LINUX-2.6\r\n"
 #define OPEN_ASCII_MODE	"150 Opening ASCII mode data connection for file list\r\n"
+#define WORKING_DIR_CHANGED	"200 Working directory changed\r\n"
 #define GOODBYE	"221 Goodbye\r\n"
 
 static int parse_msg(int,char*);
@@ -96,7 +97,7 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CWD") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		//strncpy(msg,". .. a b c\n\r",1024);
+		handle_cwd(msg);
 	} else if ( strstr(msg,"DELE") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"ENC") != NULL) {
@@ -194,7 +195,25 @@ static int parse_msg(int client_sfd,char* msg)
 
 	return 0;
 }
+int handle_cwd(char* msg)
+{
+	char *str;
+	if ((str = calloc(strlen(msg),sizeof(char))) == NULL)
+		printf("calloc failed\n");
 
+	strcpy(str,msg+4);
+	str[strlen(str)-2] = '\0';
+
+	if (chdir(str) < 0) {
+		printf("%s\n",strerror(errno));
+	}
+	free(str);
+
+	memset(msg,0,1024);
+	strcpy(msg,WORKING_DIR_CHANGED);
+	return 0;
+
+}
 int handle_list(char* msg)
 {
 	DIR *dir;

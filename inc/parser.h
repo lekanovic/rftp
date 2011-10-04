@@ -6,4 +6,5 @@ int handle_list(char*);
 int handle_pwd(char*);
 int handle_port(char*);
 int handle_pasv(int,char*);
+int handle_cwd(char*);
 #endif
