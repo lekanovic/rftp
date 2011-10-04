@@ -137,7 +137,7 @@ static int parse_msg(int client_sfd,char* msg)
 	} else if ( strstr(msg,"PASS") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 		memset(msg,0,1024);
-		strncpy(msg,"230 Welcome to server\n",1024);
+		strncpy(msg,"230 Welcome to server\r\n",1024);
 	} else if ( strstr(msg,"PASV") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 		handle_pasv(client_sfd,msg);
