@@ -139,6 +139,7 @@ static int parse_msg(int client_sfd,char* msg)
 		strncpy(msg,"230 Welcome to server\n",1024);
 	} else if ( strstr(msg,"PASV") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
+		handle_pasv(client_sfd,msg);
 	} else if ( strstr(msg,"PBSZ") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PORT") != NULL) {
@@ -228,6 +229,20 @@ int handle_pwd(char* msg)
 	strcpy(msg,"250 ");
 	strcat(msg,tmp);
 	strcat(msg,"\r\n");
+
+	return 0;
+}
+/*
+ * passive FTP :
+ *     command : client >1023 -> server 21
+ *     data    : client >1023 -> server > 1023
+ */
+int handle_pasv(int cli_sock,char* msg)
+{
+	// "227 Entering Passive Mode"
+	// "150 Opening ASCII mode data connection"
+	// skicka
+	// "226 Transfer complete"
 
 	return 0;
 }
