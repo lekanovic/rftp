@@ -5,9 +5,11 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <dirent.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include "parser.h"
 /* CR \r
  * LF \n
@@ -17,6 +19,8 @@
 #define SYSTEM_TYPE	"215 LINUX-2.6\r\n"
 #define OPEN_ASCII_MODE	"150 Opening ASCII mode data connection for file list\r\n"
 #define WORKING_DIR_CHANGED	"200 Working directory changed\r\n"
+#define OPEN_BINARY_MODE	"150 Opening BINARY mode data connection\r\n"
+#define TRANSFER_COMPLETE	"226 Transfer complete\r\n"
 #define GOODBYE	"221 Goodbye\r\n"
 
 static int parse_msg(int,char*);
@@ -73,7 +77,7 @@ int handle_msg(int client_sfd)
 	printf("echo msg exit\n");
 	return 0;
 }
-int port_fd;
+int data_fd;
 
 static int parse_msg(int client_sfd,char* msg)
 {
@@ -145,7 +149,7 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PORT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		port_fd = handle_port(msg);
+		data_fd = handle_port(msg);
 	} else if ( strstr(msg,"PROT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PWD") != NULL) {
@@ -160,6 +164,7 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"RETR") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
+		handle_retr(client_sfd,msg);
 	} else if ( strstr(msg,"RMD") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"RNFR") != NULL) {
@@ -192,6 +197,48 @@ static int parse_msg(int client_sfd,char* msg)
 		strncpy(msg,LOGIN_MSG,strlen(LOGIN_MSG));
 	} else
 		return -1;
+
+	return 0;
+}
+int handle_retr(int cmd_port, char* msg)
+{
+	char *buf;
+	int fd,file_size,bytes;
+	char *file = msg + 5;
+
+	file[strlen(file)-1] = file[strlen(file)-2] = '\0';
+
+	if ((fd = open(file,O_RDONLY)) < 0) {
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+	}
+
+	if ((file_size = lseek(fd,0,SEEK_END)) < 0) {
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+	}
+
+	if (lseek(fd,0,SEEK_SET) < 0) {
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+	}
+
+	if ((buf = malloc(file_size)) == NULL) {
+		printf("[malloc failed] %s %s %d\n",__FILE__,__func__,__LINE__);
+	}
+
+	if ((bytes = read(fd,buf,file_size)) < 0) {
+		printf("%s\n",strerror(errno));
+	}
+
+	ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
+
+	ftp_send(data_fd,buf,file_size,0);
+
+	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+
+	close(data_fd);
+	close(fd);
+	free(buf);
+
+	memset(msg,0,1024);
 
 	return 0;
 }
@@ -230,11 +277,11 @@ int handle_list(char* msg)
 		strcat(msg," ");
 	}
 	strcat(msg,"\r\n");
-	ftp_send(port_fd,msg,strlen(msg),0);
+	ftp_send(data_fd,msg,strlen(msg),0);
 
 	memset(msg,0,1024);
-	strcpy(msg,"226 Transfer complete\r\n");
-	close(port_fd);
+	strcpy(msg,TRANSFER_COMPLETE);
+	close(data_fd);
 
 	return 2;
 }
