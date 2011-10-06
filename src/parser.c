@@ -81,9 +81,7 @@ int data_fd;
 
 static int parse_msg(int client_sfd,char* msg)
 {
-	if (strstr(msg,"?") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
-	} else if ( strstr(msg,"ABOR") != NULL) {
+	if ( strstr(msg,"ABOR") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"ACCT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
