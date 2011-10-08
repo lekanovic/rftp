@@ -14,15 +14,15 @@
 /* CR \r
  * LF \n
  */
-#define WELCOME_MSG	"220 Raddes ftp server beta v1.0\r\n"
-#define LOGIN_MSG	"331 Anonymous access allowed\r\n"
-#define SYSTEM_TYPE	"215 LINUX-2.6\r\n"
-#define OPEN_ASCII_MODE	"150 Opening ASCII mode data connection for file list\r\n"
+#define WELCOME_MSG		"220 Raddes ftp server beta v1.0\r\n"
+#define LOGIN_MSG		"331 Anonymous access allowed\r\n"
+#define SYSTEM_TYPE		"215 LINUX-2.6\r\n"
+#define OPEN_ASCII_MODE		"150 Opening ASCII mode data connection for file list\r\n"
 #define WORKING_DIR_CHANGED	"200 Working directory changed\r\n"
 #define OPEN_BINARY_MODE	"150 Opening BINARY mode data connection\r\n"
 #define TRANSFER_COMPLETE	"226 Transfer complete\r\n"
-#define GOODBYE	"221 Goodbye\r\n"
-
+#define GOODBYE			"221 Goodbye\r\n"
+#define PORT_CMD_OK		"200 PORT command successful\r\n"
 static int parse_msg(int,char*);
 
 static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
@@ -32,7 +32,7 @@ static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
 	if ((bytes = recv(sockfd,buf,len,0)) < 0)
 		printf("%s line %d\n",strerror(errno),__LINE__);
 
-	printf("[DATA:recv:fd=%d] %s\n",sockfd,(char*)buf);
+	printf("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
 	return bytes;
 }
@@ -40,7 +40,7 @@ static ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
 {
 	int bytes;
 
-	printf("[DATA:send:fd=%d] %s\n",sockfd,(char*)buf);
+	printf("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
 	if ((bytes = send(sockfd,buf,len,0)) < 0)
 		printf("%s line %d\n",strerror(errno),__LINE__);
@@ -148,6 +148,7 @@ static int parse_msg(int client_sfd,char* msg)
 	} else if ( strstr(msg,"PORT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 		data_fd = handle_port(msg);
+		printf("Data port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PROT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PWD") != NULL) {
@@ -179,6 +180,7 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STOR") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
+		handle_stor(client_sfd,msg);
 	} else if ( strstr(msg,"STOU") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STRU") != NULL) {
@@ -196,6 +198,21 @@ static int parse_msg(int client_sfd,char* msg)
 	} else
 		return -1;
 
+	return 0;
+}
+int handle_stor(int cmd_port, char *msg)
+{
+	//char *file = msg + 5;
+	char buf[1024];
+	memset(buf,0,1024);
+	//file[strlen(file)-1] = file[strlen(file)-2] = '\0';//remove \r\n
+
+	//ftp_recv(data_fd,buf,1024,0);
+
+	//printf("data: %s\n",buf);
+
+
+	memset(msg,0,1024);
 	return 0;
 }
 int handle_retr(int cmd_port, char* msg)
@@ -340,7 +357,7 @@ int handle_port(char* msg)
 				strerror(errno),serv_addr.sin_port);
 
 	memset(msg,0,1024);
-	strcpy(msg, "200 PORT command successful\r\n");
+	strcpy(msg, PORT_CMD_OK);
 	return fd;
 }
 

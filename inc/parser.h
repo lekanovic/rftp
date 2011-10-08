@@ -7,5 +7,6 @@ int handle_pwd(char*);
 int handle_port(char*);
 int handle_pasv(int,char*);
 int handle_cwd(char*);
-int handle_retr(int cmd_port, char* msg);
+int handle_retr(int,char*);
+int handle_stor(int,char*);
 #endif
