@@ -202,14 +202,10 @@ static int parse_msg(int client_sfd,char* msg)
 }
 int handle_stor(int cmd_port, char *msg)
 {
-	//char *file = msg + 5;
+	char *file = msg + 5;
 	char buf[1024];
 	memset(buf,0,1024);
-	//file[strlen(file)-1] = file[strlen(file)-2] = '\0';//remove \r\n
-
-	//ftp_recv(data_fd,buf,1024,0);
-
-	//printf("data: %s\n",buf);
+	file[strlen(file)-1] = file[strlen(file)-2] = '\0';//remove \r\n
 
 
 	memset(msg,0,1024);
@@ -332,7 +328,6 @@ int handle_port(char* msg)
 {
 	int fd;
 	char* pch;
-	char tmp[10];
 	int ip[6],i=0;
 	struct sockaddr_in serv_addr;
 
@@ -344,11 +339,8 @@ int handle_port(char* msg)
 		pch = strtok(NULL," ,");
 	}
 
-	memset(tmp,0,10);
-	sprintf(tmp,"%x%x",ip[4],ip[5]);
-
 	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(strtol(tmp,NULL,16));
+	serv_addr.sin_port = htons(ip[4]*256+ip[5]);
 	serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 	fd = socket(AF_INET,SOCK_STREAM,0);
@@ -358,6 +350,7 @@ int handle_port(char* msg)
 
 	memset(msg,0,1024);
 	strcpy(msg, PORT_CMD_OK);
+
 	return fd;
 }
 
