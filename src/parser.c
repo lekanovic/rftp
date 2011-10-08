@@ -11,6 +11,8 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include "parser.h"
+#include "mem_op.h"
+#include "file_op.h"
 /* CR \r
  * LF \n
  */
@@ -32,7 +34,7 @@ static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
 	if ((bytes = recv(sockfd,buf,len,0)) < 0)
 		printf("%s line %d\n",strerror(errno),__LINE__);
 
-	printf("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
+	//printf("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
 	return bytes;
 }
@@ -40,7 +42,7 @@ static ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
 {
 	int bytes;
 
-	printf("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
+	//printf("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
 	if ((bytes = send(sockfd,buf,len,0)) < 0)
 		printf("%s line %d\n",strerror(errno),__LINE__);
@@ -274,18 +276,15 @@ int handle_cwd(char* msg)
 }
 int handle_list(char* msg)
 {
-	DIR *dir;
-	struct dirent *dent;
-	int bytes=0;
+	int i=0;
+	char **ppdir;
 
-	memset(msg,0,1024);
-	dir = opendir(".");
-
-	while ((dent = readdir(dir)) != NULL) {
-		bytes += strlen(dent->d_name);
-		if ( bytes >= 1024 ) break;
-		strcat(msg,dent->d_name);
-		strcat(msg," ");
+	if ((ppdir=ls()) != NULL) {
+		for (i=0; ppdir[i] != NULL;i++){
+			ftp_send(data_fd,ppdir[i],strlen(ppdir[i]),0);
+			ftp_free(ppdir[i]);
+		}
+		ftp_free(ppdir);
 	}
 	strcat(msg,"\r\n");
 	ftp_send(data_fd,msg,strlen(msg),0);
