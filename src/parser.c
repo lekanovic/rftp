@@ -25,16 +25,21 @@
 #define TRANSFER_COMPLETE	"226 Transfer complete\r\n"
 #define GOODBYE			"221 Goodbye\r\n"
 #define PORT_CMD_OK		"200 PORT command successful\r\n"
+
+#define DEBUG 1
+
+#define debug_print(args ...) if (DEBUG) fprintf(stderr, args)
+
 static int parse_msg(int,char*);
 
 static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
 {
 	int bytes;
 
-	if ((bytes = recv(sockfd,buf,len,0)) < 0)
+	if ((bytes = recv(sockfd,buf,len,flags)) < 0)
 		printf("%s line %d\n",strerror(errno),__LINE__);
 
-	//printf("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
+	debug_print("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
 	return bytes;
 }
@@ -42,9 +47,9 @@ static ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
 {
 	int bytes;
 
-	//printf("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
+	debug_print("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
-	if ((bytes = send(sockfd,buf,len,0)) < 0)
+	if ((bytes = send(sockfd,buf,len,flags)) < 0)
 		printf("%s line %d\n",strerror(errno),__LINE__);
 
 	return bytes;
