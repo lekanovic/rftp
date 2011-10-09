@@ -26,6 +26,7 @@
 #define TRANSFER_COMPLETE	"226 Transfer complete\r\n"
 #define GOODBYE			"221 Goodbye\r\n"
 #define PORT_CMD_OK		"200 PORT command successful\r\n"
+#define START_STOR_CMD		"150 File start to download\r\n"
 
 #define DEBUG 1
 
@@ -218,12 +219,26 @@ int handle_user(int cmd_port,char* msg)
 }
 int handle_stor(int cmd_port, char *msg)
 {
+	int fd,bytes;
 	char *file = msg + 5;
 	char buf[1024];
 	memset(buf,0,1024);
 	file[strlen(file)-1] = file[strlen(file)-2] = '\0';//remove \r\n
 
+	ftp_send(cmd_port,START_STOR_CMD,strlen(START_STOR_CMD),0);
 
+	if ((fd=open(file,O_CREAT|O_RDWR)) < 0)
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+
+	ftp_recv(data_fd,buf,1024,0);
+
+	if ((bytes=write(fd,buf,strlen(buf))) < 0)
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+
+	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+
+	close(fd);
+	close(data_fd);
 	return 0;
 }
 int handle_retr(int cmd_port, char* msg)
