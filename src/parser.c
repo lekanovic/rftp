@@ -322,10 +322,6 @@ int handle_list(int cmd_port,char* msg)
 		}
 		ftp_free(ppdir);
 	}
-	strcat(msg,"\r\n");
-	ftp_send(data_fd,msg,strlen(msg),0);
-
-	memset(msg,0,1024);
 
 	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
