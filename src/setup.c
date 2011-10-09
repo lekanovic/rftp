@@ -30,23 +30,25 @@ void* connection(void* argument)
 
 int start_server()
 {
-	int client_sfd,i=0;
+	int client_sfd,i=0,port=7000;
 	socklen_t addrlen;
 	struct sockaddr_in address;
 	pthread_t threads[THREADS];
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
-		printf("%s line %d\n",strerror(errno),__LINE__);
-
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+again:
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(7000);
+	address.sin_port = htons(port);
 
-	if (bind(sfd, (struct sockaddr*)&address, sizeof(address)) < 0)
-		printf("%s line %d\n",strerror(errno),__LINE__);
-
+	if (bind(sfd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+		port++;
+		goto again;
+	}
+	printf("Using port: %d\n",port);
 	if (listen(sfd,3) < 0)
-		printf("%s line %d\n",strerror(errno),__LINE__);
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 
 	addrlen = sizeof(struct sockaddr_in);
 
