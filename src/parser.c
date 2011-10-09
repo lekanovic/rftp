@@ -432,8 +432,7 @@ again:
 
 	addrlen = sizeof(struct sockaddr_in);
 
-	strcpy(msg,"227 Entering Passive Mode");
-	sprintf(msg + strlen(msg)," (127,0,0,1,%d,%d)\r\n",a,b);
+	sprintf(msg,"227 Entering Passive Mode (127,0,0,1,%d,%d)\r\n",a,b);
 
 	ftp_send(cmd_port,msg,strlen(msg),0);
 
