@@ -28,7 +28,8 @@
 #define PORT_CMD_OK		"200 PORT command successful\r\n"
 #define START_STOR_CMD		"150 File start to download\r\n"
 #define ENTER_PASSV_MODE	"227 Entering Passive Mode\r\n"
-
+#define FILE_UNAVAILABLE	"550 Requested action not taken. File unavailable\r\n"
+#define FILE_ACTION_OK		"250 Requested file action okay, completed\r\n"
 #define DEBUG 1
 
 #define debug_print(args ...) if (DEBUG) fprintf(stderr, args)
@@ -130,6 +131,7 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MKD") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
+		handle_mkd(client_sfd,msg);
 	} else if ( strstr(msg,"MLSD") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MLST") != NULL) {
@@ -172,6 +174,7 @@ static int parse_msg(int client_sfd,char* msg)
 		handle_retr(client_sfd,msg);
 	} else if ( strstr(msg,"RMD") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
+		handle_rmd(client_sfd,msg);
 	} else if ( strstr(msg,"RNFR") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"RNTO") != NULL) {
@@ -203,6 +206,51 @@ static int parse_msg(int client_sfd,char* msg)
 	} else
 		return -1;
 
+	return 0;
+}
+// RMD  <SP> <pathname> <CRLF>
+// 250 Requested file action okay, completed.
+int handle_rmd(int cmd_port,char* msg)
+{
+	int ret;
+	char* send_msg;
+	char* dir = msg + 4;
+	dir[strlen(dir)-1] = dir[strlen(dir)-2] = '\0';//remove \r\n
+
+	if ((ret=rmdir(dir)) < 0) {
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		send_msg = calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
+		sprintf(send_msg,"%s",FILE_UNAVAILABLE);
+	} else {
+		send_msg = calloc(strlen(FILE_ACTION_OK)+1,
+				sizeof(char));
+		sprintf(send_msg,"%s",FILE_ACTION_OK);
+	}
+	ftp_send(cmd_port,send_msg,strlen(send_msg),0);
+
+	free(send_msg);
+	return 0;
+}
+int handle_mkd(int cmd_port,char* msg)
+{
+	char* send_msg;
+	char* dir = msg + 4;
+	int ret;
+
+	dir[strlen(dir)-1] = dir[strlen(dir)-2] = '\0';//remove \r\n
+
+	if ((ret=mkdir(dir,S_IRWXU)) < 0) {
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		send_msg = calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
+		sprintf(send_msg,"%s",FILE_UNAVAILABLE);
+	} else {
+		send_msg = calloc(4+strlen(dir)+strlen("\'directory created\'")+1,
+				 sizeof(char));
+		sprintf(send_msg,"257 %s directory created\r\n",dir);
+	}
+	ftp_send(cmd_port,send_msg,strlen(send_msg),0);
+
+	free(send_msg);
 	return 0;
 }
 int handle_type(int cmd_port)
@@ -259,6 +307,8 @@ int handle_retr(int cmd_port, char* msg)
 
 	if ((fd = open(file,O_RDONLY)) < 0) {
 		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ftp_send(cmd_port,FILE_UNAVAILABLE,strlen(FILE_UNAVAILABLE),0);
+		return 0;
 	}
 
 	if ((file_size = lseek(fd,0,SEEK_END)) < 0) {
@@ -270,11 +320,11 @@ int handle_retr(int cmd_port, char* msg)
 	}
 
 	if ((buf = malloc(file_size)) == NULL) {
-		printf("[malloc failed] %s %s %d\n",__FILE__,__func__,__LINE__);
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 	}
 
 	if ((bytes = read(fd,buf,file_size)) < 0) {
-		printf("%s\n",strerror(errno));
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 	}
 
 	ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);

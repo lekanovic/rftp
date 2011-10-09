@@ -13,4 +13,6 @@ int handle_stor(int,char*);
 int handle_user(int,char*);
 int handle_syst(int,char*);
 int handle_pass(int,char*);
+int handle_mkd(int,char*);
+int handle_rmd(int,char*);
 #endif
