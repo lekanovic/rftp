@@ -40,7 +40,7 @@ static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
 	int bytes;
 
 	if ((bytes = recv(sockfd,buf,len,flags)) < 0)
-		printf("%s line %d\n",strerror(errno),__LINE__);
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 
 	debug_print("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
@@ -53,7 +53,7 @@ static ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
 	debug_print("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
 	if ((bytes = send(sockfd,buf,len,flags)) < 0)
-		printf("%s line %d\n",strerror(errno),__LINE__);
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 
 	return bytes;
 }
@@ -235,7 +235,7 @@ int handle_stor(int cmd_port, char *msg)
 
 	ftp_send(cmd_port,START_STOR_CMD,strlen(START_STOR_CMD),0);
 
-	if ((fd=open(file,O_CREAT|O_RDWR)) < 0)
+	if ((fd=open(file,O_CREAT|O_RDWR,S_IRWXU)) < 0)
 		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 
 	ftp_recv(data_fd,buf,1024,0);
@@ -337,9 +337,9 @@ int handle_pwd(int cmd_port)
 	memset(tmp,0,512);
 	getcwd(tmp,512);
 	memset(msg,0,1024);
-	sprintf(msg,"250 %s \r\n",tmp);
+	sprintf(msg,"257 %s \r\n",tmp);
 
-	ftp_send(cmd_port,msg,strlen(msg),0);
+	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
 	return 0;
 }
