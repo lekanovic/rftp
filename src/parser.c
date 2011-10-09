@@ -20,9 +20,9 @@
 #define WELCOME_MSG		"220 Raddes ftp server beta v1.0\r\n"
 #define LOGIN_MSG		"331 Anonymous access allowed\r\n"
 #define SYSTEM_TYPE		"215 LINUX-2.6\r\n"
-#define OPEN_ASCII_MODE		"150 Opening ASCII mode data connection for file list\r\n"
+#define OPEN_ASCII_MODE		"200 Opening ASCII mode data connection\r\n"
+#define OPEN_BINARY_MODE	"200 Opening binary mode data connection\r\n"
 #define WORKING_DIR_CHANGED	"200 Working directory changed\r\n"
-#define OPEN_BINARY_MODE	"150 Opening BINARY mode data connection\r\n"
 #define TRANSFER_COMPLETE	"226 Transfer complete\r\n"
 #define GOODBYE			"221 Goodbye\r\n"
 #define PORT_CMD_OK		"200 PORT command successful\r\n"
@@ -30,7 +30,7 @@
 #define ENTER_PASSV_MODE	"227 Entering Passive Mode\r\n"
 #define FILE_UNAVAILABLE	"550 Requested action not taken. File unavailable\r\n"
 #define FILE_ACTION_OK		"250 Requested file action okay, completed\r\n"
-#define DEBUG 1
+#define DEBUG 0
 
 #define debug_print(args ...) if (DEBUG) fprintf(stderr, args)
 
@@ -199,7 +199,7 @@ static int parse_msg(int client_sfd,char* msg)
 		handle_syst(client_sfd,msg);
 	} else if ( strstr(msg,"TYPE") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		handle_type(client_sfd);
+		handle_type(client_sfd,msg);
 	} else if ( strstr(msg,"USER") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 		handle_user(client_sfd,msg);
@@ -253,9 +253,12 @@ int handle_mkd(int cmd_port,char* msg)
 	free(send_msg);
 	return 0;
 }
-int handle_type(int cmd_port)
+int handle_type(int cmd_port,char* msg)
 {
-	ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+	if ( strstr(msg,"TYPE A") != NULL)
+		ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+	else if ( strstr(msg,"TYPE I") != NULL)
+		ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
 	return 0;
 }
 int handle_pass(int cmd_port,char* msg)
@@ -275,7 +278,7 @@ int handle_user(int cmd_port,char* msg)
 }
 int handle_stor(int cmd_port, char *msg)
 {
-	int fd,bytes;
+	int fd,bytes,data;
 	char *file = msg + 5;
 	char buf[1024];
 	memset(buf,0,1024);
@@ -286,10 +289,11 @@ int handle_stor(int cmd_port, char *msg)
 	if ((fd=open(file,O_CREAT|O_RDWR,S_IRWXU)) < 0)
 		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 
-	ftp_recv(data_fd,buf,1024,0);
-
-	if ((bytes=write(fd,buf,strlen(buf))) < 0)
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+	while ((data=ftp_recv(data_fd,buf,1024,0)) != 0) {
+		if ((bytes=write(fd,buf,data)) < 0)
+			printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		lseek(fd,0,SEEK_END);
+	}
 
 	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
@@ -501,6 +505,7 @@ int echo_msg(int client_sfd)
 	printf("echo msg exit\n");
 	return 0;
 }
+
 
 
 

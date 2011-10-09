@@ -4,7 +4,7 @@ int echo_msg(int);
 int handle_msg(int);
 int handle_list(int,char*);
 int handle_pwd(int);
-int handle_type(int);
+int handle_type(int,char*);
 int handle_port(int,char*);
 int handle_pasv(int);
 int handle_cwd(int,char*);
