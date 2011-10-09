@@ -27,6 +27,7 @@
 #define GOODBYE			"221 Goodbye\r\n"
 #define PORT_CMD_OK		"200 PORT command successful\r\n"
 #define START_STOR_CMD		"150 File start to download\r\n"
+#define ENTER_PASSV_MODE	"227 Entering Passive Mode\r\n"
 
 #define DEBUG 1
 
@@ -146,13 +147,14 @@ static int parse_msg(int client_sfd,char* msg)
 		handle_pass(client_sfd,msg);
 	} else if ( strstr(msg,"PASV") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		handle_pasv(client_sfd,msg);
+		data_fd = handle_pasv(client_sfd);
+		printf("Passive port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PBSZ") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PORT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 		data_fd = handle_port(client_sfd,msg);
-		printf("Data port opened %d\n",data_fd);
+		printf("Active port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PROT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PWD") != NULL) {
@@ -345,19 +347,53 @@ int handle_pwd(int cmd_port)
 
 	return 0;
 }
+static int getport(int a,int b)
+{
+	return (a*256 + b);
+}
 /*
  * passive FTP :
  *     command : client >1023 -> server 21
  *     data    : client >1023 -> server > 1023
+ *
+ * ip[4]*256+ip[5] => 178,16 => 178*256 + 16 = 45584;
  */
-int handle_pasv(int cli_sock,char* msg)
+int handle_pasv(int cmd_port)
 {
-	// "227 Entering Passive Mode"
-	// "150 Opening ASCII mode data connection"
-	// skicka
-	// "226 Transfer complete"
+	int sfd,client_pasv;
+	int port=45584,a=178,b=16;
+	char msg[1024];
+	struct sockaddr_in address;
+	socklen_t addrlen;
 
-	return 0;
+	memset(msg,0,1024);
+
+	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+again:
+	port = getport(a,b);
+
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons(port);
+
+	if (bind(sfd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+		b++;
+		goto again;
+	}
+	if (listen(sfd,3) < 0)
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+
+	addrlen = sizeof(struct sockaddr_in);
+
+	strcpy(msg,"227 Entering Passive Mode");
+	sprintf(msg + strlen(msg)," (127,0,0,1,%d,%d)\r\n",a,b);
+
+	ftp_send(cmd_port,msg,strlen(msg),0);
+
+	client_pasv = accept(sfd,(struct sockaddr*)&address,&addrlen);
+
+	return client_pasv;
 }
 
 int handle_port(int cmd_port,char* msg)
