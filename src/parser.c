@@ -194,12 +194,18 @@ static int parse_msg(int client_sfd,char* msg)
 		handle_syst(client_sfd,msg);
 	} else if ( strstr(msg,"TYPE") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
+		handle_type(client_sfd);
 	} else if ( strstr(msg,"USER") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 		handle_user(client_sfd,msg);
 	} else
 		return -1;
 
+	return 0;
+}
+int handle_type(int cmd_port)
+{
+	ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
 	return 0;
 }
 int handle_pass(int cmd_port,char* msg)
