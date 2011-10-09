@@ -16,6 +16,7 @@
 /* CR \r
  * LF \n
  */
+#define LOG_IN_OK		"230 Welcome to server\r\n"
 #define WELCOME_MSG		"220 Raddes ftp server beta v1.0\r\n"
 #define LOGIN_MSG		"331 Anonymous access allowed\r\n"
 #define SYSTEM_TYPE		"215 LINUX-2.6\r\n"
@@ -76,9 +77,6 @@ int handle_msg(int client_sfd)
 			break;
 		}
 
-		if (ftp_send(client_sfd,buf,strlen(buf),0) < 0)
-			printf("%s line %d\n",strerror(errno),__LINE__);
-
 		memset(buf,0,1024);
 	}
 	printf("echo msg exit\n");
@@ -106,7 +104,7 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CWD") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		handle_cwd(msg);
+		handle_cwd(client_sfd,msg);
 	} else if ( strstr(msg,"DELE") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"ENC") != NULL) {
@@ -119,8 +117,7 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"LIST") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		ftp_send(client_sfd,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
-		return handle_list(msg);
+		return handle_list(client_sfd,msg);
 	} else if ( strstr(msg,"LPRT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"LPSV") != NULL) {
@@ -145,8 +142,7 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PASS") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		memset(msg,0,1024);
-		strncpy(msg,"230 Welcome to server\r\n",1024);
+		handle_pass(client_sfd,msg);
 	} else if ( strstr(msg,"PASV") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 		handle_pasv(client_sfd,msg);
@@ -154,13 +150,13 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PORT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		data_fd = handle_port(msg);
+		data_fd = handle_port(client_sfd,msg);
 		printf("Data port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PROT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PWD") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		handle_pwd(msg);
+		handle_pwd(client_sfd);
 	} else if ( strstr(msg,"QUIT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 		return -1;
@@ -194,17 +190,30 @@ static int parse_msg(int client_sfd,char* msg)
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SYST") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		memset(msg,0,1024);
-		strncpy(msg,SYSTEM_TYPE,strlen(SYSTEM_TYPE));
+		handle_syst(client_sfd,msg);
 	} else if ( strstr(msg,"TYPE") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"USER") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
-		memset(msg,0,1024);
-		strncpy(msg,LOGIN_MSG,strlen(LOGIN_MSG));
+		handle_user(client_sfd,msg);
 	} else
 		return -1;
 
+	return 0;
+}
+int handle_pass(int cmd_port,char* msg)
+{
+	ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
+	return 0;
+}
+int handle_syst(int cmd_port,char* msg)
+{
+	ftp_send(cmd_port,SYSTEM_TYPE,strlen(SYSTEM_TYPE),0);
+	return 0;
+}
+int handle_user(int cmd_port,char* msg)
+{
+	ftp_send(cmd_port,LOGIN_MSG,strlen(LOGIN_MSG),0);
 	return 0;
 }
 int handle_stor(int cmd_port, char *msg)
@@ -215,7 +224,6 @@ int handle_stor(int cmd_port, char *msg)
 	file[strlen(file)-1] = file[strlen(file)-2] = '\0';//remove \r\n
 
 
-	memset(msg,0,1024);
 	return 0;
 }
 int handle_retr(int cmd_port, char* msg)
@@ -256,11 +264,9 @@ int handle_retr(int cmd_port, char* msg)
 	close(fd);
 	free(buf);
 
-	memset(msg,0,1024);
-
 	return 0;
 }
-int handle_cwd(char* msg)
+int handle_cwd(int cmd_port,char* msg)
 {
 	char *str;
 	if ((str = calloc(strlen(msg),sizeof(char))) == NULL)
@@ -274,15 +280,17 @@ int handle_cwd(char* msg)
 	}
 	free(str);
 
-	memset(msg,0,1024);
-	strcpy(msg,WORKING_DIR_CHANGED);
+	ftp_send(cmd_port,WORKING_DIR_CHANGED,strlen(WORKING_DIR_CHANGED),0);
+
 	return 0;
 
 }
-int handle_list(char* msg)
+int handle_list(int cmd_port,char* msg)
 {
 	int i=0;
 	char **ppdir;
+
+	ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
 
 	if ((ppdir=ls()) != NULL) {
 		for (i=0; ppdir[i] != NULL;i++){
@@ -295,21 +303,24 @@ int handle_list(char* msg)
 	ftp_send(data_fd,msg,strlen(msg),0);
 
 	memset(msg,0,1024);
-	strcpy(msg,TRANSFER_COMPLETE);
+
+	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+
 	close(data_fd);
 
 	return 2;
 }
-int handle_pwd(char* msg)
+int handle_pwd(int cmd_port)
 {
+	char msg[1024];
 	char tmp[512];
 
 	memset(tmp,0,512);
 	getcwd(tmp,512);
 	memset(msg,0,1024);
-	strcpy(msg,"250 ");
-	strcat(msg,tmp);
-	strcat(msg,"\r\n");
+	sprintf(msg,"250 %s \r\n",tmp);
+
+	ftp_send(cmd_port,msg,strlen(msg),0);
 
 	return 0;
 }
@@ -328,7 +339,7 @@ int handle_pasv(int cli_sock,char* msg)
 	return 0;
 }
 
-int handle_port(char* msg)
+int handle_port(int cmd_port,char* msg)
 {
 	int fd;
 	char* pch;
@@ -352,8 +363,7 @@ int handle_port(char* msg)
 		printf("%s %d %s port %d\n",__func__,__LINE__,
 				strerror(errno),serv_addr.sin_port);
 
-	memset(msg,0,1024);
-	strcpy(msg, PORT_CMD_OK);
+	ftp_send(cmd_port,PORT_CMD_OK,strlen(PORT_CMD_OK),0);
 
 	return fd;
 }
