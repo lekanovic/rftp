@@ -385,15 +385,20 @@ int handle_list(int cmd_port,char* msg)
 }
 int handle_pwd(int cmd_port)
 {
-	char msg[1024];
-	char tmp[512];
+#define BUF_SIZE	1024
+	char *msg;
 
-	memset(tmp,0,512);
-	getcwd(tmp,512);
-	memset(msg,0,1024);
-	sprintf(msg,"257 %s \r\n",tmp);
+	msg = calloc(BUF_SIZE, sizeof(char));
 
-	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+	strcpy(msg, "257 ");
+
+	getcwd(msg,BUF_SIZE);
+
+	strcat(msg,"\r\n");
+
+	ftp_send(cmd_port,msg,strlen(msg),0);
+
+	free(msg);
 
 	return 0;
 }
