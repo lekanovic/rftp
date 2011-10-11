@@ -21,7 +21,9 @@
 #define LOGIN_MSG		"331 Anonymous access allowed\r\n"
 #define SYSTEM_TYPE		"215 LINUX-2.6\r\n"
 #define OPEN_ASCII_MODE		"150 Opening ASCII mode data connection\r\n"
+#define TYPE_ASCII_MODE		"200 Opening ASCII mode data connection\r\n"
 #define OPEN_BINARY_MODE	"150 Opening binary mode data connection\r\n"
+#define TYPE_BINARY_MODE	"200 Opening binary mode data connection\r\n"
 #define WORKING_DIR_CHANGED	"200 Working directory changed\r\n"
 #define TRANSFER_COMPLETE	"226 Transfer complete\r\n"
 #define GOODBYE			"221 Goodbye\r\n"
@@ -256,9 +258,11 @@ int handle_mkd(int cmd_port,char* msg)
 int handle_type(int cmd_port,char* msg)
 {
 	if ( strstr(msg,"TYPE A") != NULL)
-		ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+		ftp_send(cmd_port,TYPE_ASCII_MODE,strlen(TYPE_ASCII_MODE),0);
 	else if ( strstr(msg,"TYPE I") != NULL)
-		ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
+		ftp_send(cmd_port,TYPE_BINARY_MODE,strlen(TYPE_BINARY_MODE),0);
+	else
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 	return 0;
 }
 int handle_pass(int cmd_port,char* msg)
@@ -392,7 +396,7 @@ int handle_pwd(int cmd_port)
 
 	strcpy(msg, "257 ");
 
-	getcwd(msg,BUF_SIZE);
+	getcwd(msg+strlen(msg),BUF_SIZE);
 
 	strcat(msg,"\r\n");
 
