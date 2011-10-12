@@ -13,6 +13,7 @@
 #include "parser.h"
 #include "mem_op.h"
 #include "file_op.h"
+#include "err_print.h"
 /* CR \r
  * LF \n
  */
@@ -220,7 +221,7 @@ int handle_dele(int cmd_port,char *msg)
 	file[strlen(file)-1] = file[strlen(file)-2] = '\0';
 
 	if ((ret=unlink(file)) < 0) {
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("unlink\n");
 	}
 
 	send_msg = calloc(25 + strlen(file), sizeof(char));
@@ -242,7 +243,7 @@ int handle_rmd(int cmd_port,char* msg)
 	dir[strlen(dir)-1] = dir[strlen(dir)-2] = '\0';//remove \r\n
 
 	if ((ret=rmdir(dir)) < 0) {
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("rmdir\n");
 		send_msg = calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
 		sprintf(send_msg,"%s",FILE_UNAVAILABLE);
 	} else {
@@ -264,7 +265,7 @@ int handle_mkd(int cmd_port,char* msg)
 	dir[strlen(dir)-1] = dir[strlen(dir)-2] = '\0';//remove \r\n
 
 	if ((ret=mkdir(dir,S_IRWXU)) < 0) {
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("mkdir\n");
 		send_msg = calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
 		sprintf(send_msg,"%s",FILE_UNAVAILABLE);
 	} else {
@@ -284,7 +285,7 @@ int handle_type(int cmd_port,char* msg)
 	else if ( strstr(msg,"TYPE I") != NULL)
 		ftp_send(cmd_port,TYPE_BINARY_MODE,strlen(TYPE_BINARY_MODE),0);
 	else
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("No TYPE\n");
 	return 0;
 }
 int handle_pass(int cmd_port,char* msg)
@@ -313,11 +314,11 @@ int handle_stor(int cmd_port, char *msg)
 	ftp_send(cmd_port,START_STOR_CMD,strlen(START_STOR_CMD),0);
 
 	if ((fd=open(file,O_CREAT|O_RDWR,S_IRWXU)) < 0)
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("open\n");
 
 	while ((data=ftp_recv(data_fd,buf,1024,0)) != 0) {
 		if ((bytes=write(fd,buf,data)) < 0)
-			printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+			ERR("write\n");
 		lseek(fd,0,SEEK_END);
 	}
 
@@ -336,25 +337,25 @@ int handle_retr(int cmd_port, char* msg)
 	file[strlen(file)-1] = file[strlen(file)-2] = '\0';
 
 	if ((fd = open(file,O_RDONLY)) < 0) {
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("open\n")
 		ftp_send(cmd_port,FILE_UNAVAILABLE,strlen(FILE_UNAVAILABLE),0);
 		return 0;
 	}
 
 	if ((file_size = lseek(fd,0,SEEK_END)) < 0) {
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("lseek\n");
 	}
 
 	if (lseek(fd,0,SEEK_SET) < 0) {
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("lseek\n");
 	}
 
 	if ((buf = malloc(file_size)) == NULL) {
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("malloc\n");
 	}
 
 	if ((bytes = read(fd,buf,file_size)) < 0) {
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("read\n");
 	}
 
 	ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
@@ -373,7 +374,7 @@ int handle_cwd(int cmd_port,char* msg)
 {
 	char *str;
 	if ((str = calloc(strlen(msg),sizeof(char))) == NULL)
-		printf("calloc failed\n");
+		ERR("calloc\n");
 
 	strcpy(str,msg+4);
 	str[strlen(str)-2] = '\0';
@@ -450,7 +451,7 @@ int handle_pasv(int cmd_port)
 	memset(msg,0,1024);
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("socket\n");
 again:
 	port = getport(a,b);
 
@@ -463,7 +464,7 @@ again:
 		goto again;
 	}
 	if (listen(sfd,3) < 0)
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("listen\n");
 
 	addrlen = sizeof(struct sockaddr_in);
 
@@ -497,8 +498,7 @@ int handle_port(int cmd_port,char* msg)
 
 	fd = socket(AF_INET,SOCK_STREAM,0);
 	if (connect(fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
-		printf("%s %d %s port %d\n",__func__,__LINE__,
-				strerror(errno),serv_addr.sin_port);
+		ERR("connect\n");
 
 	ftp_send(cmd_port,PORT_CMD_OK,strlen(PORT_CMD_OK),0);
 
