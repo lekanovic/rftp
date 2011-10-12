@@ -45,6 +45,7 @@ def retr_cmd_test():
 	filename = 'testfile.txt'
 	try:
 		ftp.retrbinary('RETR ' + filename, open(filename, 'wb').write)
+		print_test_passed()
 	except Exception,e:
 		print e
 		print_test_failed()
@@ -54,6 +55,7 @@ def stor_cmd_test():
 	try:
 		f = open(filename,'rb')
 		ftp.storbinary('STOR ' + filename, f)
+		print_test_passed()
 	except Exception,e:
 		print e
 		print_test_failed()
@@ -82,6 +84,13 @@ def binary_mode_test():
 	else:
 		print_test_passed()
 
+def dele_cmd_test():
+	f="testfile.txt"
+	if ftp.sendcmd('DELE ' + f) != "250 " + f + " has been deleted":
+		print_test_failed()
+	else:
+		print_test_passed() 
+	
 def main(argv):
 	connect_to_ftp()
 
@@ -94,6 +103,7 @@ def main(argv):
 	rmd_cmd_test()
 	ascii_mode_test()
 	binary_mode_test()
+	dele_cmd_test()
 
 	close_connection()
 
