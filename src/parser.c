@@ -112,6 +112,7 @@ static int parse_msg(int client_sfd,char* msg)
 		handle_cwd(client_sfd,msg);
 	} else if ( strstr(msg,"DELE") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
+		handle_dele(client_sfd,msg);
 	} else if ( strstr(msg,"ENC") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"EPRT") != NULL) {
@@ -208,6 +209,27 @@ static int parse_msg(int client_sfd,char* msg)
 	} else
 		return -1;
 
+	return 0;
+}
+// DELE <SP> <pathname> <CRLF>
+int handle_dele(int cmd_port,char *msg)
+{
+	int ret;
+	char *send_msg,*file = msg + 5;
+
+	file[strlen(file)-1] = file[strlen(file)-2] = '\0';
+
+	if ((ret=unlink(file)) < 0) {
+		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+	}
+
+	send_msg = calloc(25 + strlen(file), sizeof(char));
+
+	sprintf(send_msg,"250 %s has been deleted\r\n",file);
+
+	ftp_send(cmd_port,send_msg,strlen(send_msg),0);
+
+	free(send_msg);
 	return 0;
 }
 // RMD  <SP> <pathname> <CRLF>

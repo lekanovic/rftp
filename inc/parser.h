@@ -15,4 +15,5 @@ int handle_syst(int,char*);
 int handle_pass(int,char*);
 int handle_mkd(int,char*);
 int handle_rmd(int,char*);
+int handle_dele(int,char*);
 #endif
