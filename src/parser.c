@@ -380,7 +380,7 @@ int handle_cwd(int cmd_port,char* msg)
 	str[strlen(str)-2] = '\0';
 
 	if (chdir(str) < 0) {
-		printf("%s\n",strerror(errno));
+		ERR("chdir\n")
 	}
 	free(str);
 
