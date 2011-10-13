@@ -5,6 +5,7 @@ import sys
 #http://docs.python.org/library/ftplib.html
 
 ftp = ftplib.FTP()
+port=7000
 
 def print_test_failed():
 	print "\033[01;31mTEST FAILED\033[0m"
@@ -13,7 +14,7 @@ def print_test_passed():
 	print "\033[01;34mTEST PASSED\033[0m"
 
 def connect_to_ftp():
-	ftp.connect('localhost',7000)     #specify port number when connection
+	ftp.connect('localhost',port)     #specify port number when connection
 	ftp.login('radovan','XXX')
 #	ftp.sendcmd('TYPE I')
 	#ftp.set_pasv(False)
@@ -91,7 +92,7 @@ def dele_cmd_test():
 	else:
 		print_test_passed() 
 	
-def main(argv):
+def main():
 	connect_to_ftp()
 
 	list_cmd_test()
@@ -108,7 +109,11 @@ def main(argv):
 	close_connection()
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	if len(sys.argv) == 2:
+		port = sys.argv[1]
+	else:
+		port = 7000
+	main()
 
 
 
