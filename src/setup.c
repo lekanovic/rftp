@@ -54,9 +54,9 @@ again:
 			close(sfd);
 			printf("new client, sock =%d\n",client_sfd);
 			connection(&client_sfd);
+			printf("client exit, sock =%d\n",client_sfd);
 		} else {
 			close(client_sfd);
-			printf("client exit, sock =%d\n",client_sfd);
 		}
 	}
 
