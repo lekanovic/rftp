@@ -46,7 +46,7 @@ static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
 	int bytes;
 
 	if ((bytes = recv(sockfd,buf,len,flags)) < 0)
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("recv\n");
 
 	debug_print("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
@@ -59,7 +59,7 @@ static ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
 	debug_print("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
 
 	if ((bytes = send(sockfd,buf,len,flags)) < 0)
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("send\n");
 
 	return bytes;
 }
