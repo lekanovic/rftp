@@ -14,6 +14,8 @@
 #include "mem_op.h"
 #include "file_op.h"
 #include "err_print.h"
+#include "connect.h"
+
 /* CR \r
  * LF \n
  */
@@ -33,37 +35,10 @@
 #define ENTER_PASSV_MODE	"227 Entering Passive Mode\r\n"
 #define FILE_UNAVAILABLE	"550 Requested action not taken. File unavailable\r\n"
 #define FILE_ACTION_OK		"250 Requested file action okay, completed\r\n"
-#define DEBUG 0
-
-#define debug_print(args ...) if (DEBUG) fprintf(stderr, args)
 
 #define BUF_SIZE	1024
 
 static int parse_msg(int,char*);
-
-static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
-{
-	int bytes;
-
-	if ((bytes = recv(sockfd,buf,len,flags)) < 0)
-		ERR("recv\n");
-
-	debug_print("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
-
-	return bytes;
-}
-static ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
-{
-	int bytes;
-
-	debug_print("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
-
-	if ((bytes = send(sockfd,buf,len,flags)) < 0)
-		ERR("send\n");
-
-	return bytes;
-}
-
 
 int handle_msg(int client_sfd)
 {

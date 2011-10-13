@@ -5,7 +5,8 @@ SRC=src/main.o \
     src/parser.o \
     src/passwd_file.o \
     src/file_op.o \
-    src/mem_op.o
+    src/mem_op.o \
+    src/connect.o
 
 build: $(SRC)
 	$(CC) -o server $(SRC) $(CFLAGS)
