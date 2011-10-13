@@ -2,11 +2,14 @@
 import ftplib
 import sys
 import time
+import subprocess
+import md5
 
 #http://docs.python.org/library/ftplib.html
 
 ftp = ftplib.FTP()
 port = 7000
+hash_value=0
 
 def print_test_failed():
 	print "\033[01;31mTEST FAILED\033[0m"
@@ -28,6 +31,7 @@ def stor_cmd_test():
 	except Exception,e:
 		print e
 		print_test_failed()
+	subprocess.call("rm big.bin", shell=True) #remove local file
 
 def retr_cmd_test():
 	filename = 'big.bin'
@@ -49,12 +53,40 @@ def close_connection():
 	ftp.sendcmd('QUIT')
 	ftp.close()
 
+def create_big_file():
+	global hash_value
+	print "Creating big.bin file"
+	subprocess.call("dd if=/dev/urandom of=big.bin bs=1M count=1", shell=True)
+	print "Done.."
+
+	hash = md5.new()
+	hash.update(open('big.bin').read())
+
+	hash_value = hash.hexdigest()
+	print hash_value
+
+def check_hash():
+	global hash_value
+	hash = md5.new()
+	hash.update(open('big.bin').read())
+	new_value = hash.hexdigest()
+
+	if hash_value != new_value:
+		print "hash_value %s" % hash_value
+		print "new_value %s" % new_value
+		print_test_failed()
+	else:
+		print_test_passed()
+
 def main():
+	create_big_file()
+
 	while True:
 		print "*** START NEW TEST ROUND ***"
 		connect_to_ftp()
 		stor_cmd_test()
 		retr_cmd_test()
+		check_hash()
 		dele_cmd_test()
 		close_connection()
 		time.sleep(2)
