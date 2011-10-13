@@ -27,7 +27,7 @@ int start_server()
 	struct sockaddr_in server_addr,client_addr;
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("socket\n");
 again:
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
@@ -39,7 +39,7 @@ again:
 	}
 	printf("Using port: %d\n",port);
 	if (listen(sfd,3) < 0)
-		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
+		ERR("listen\n");
 
 	addrlen = sizeof(struct sockaddr_in);
 
