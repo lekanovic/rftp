@@ -32,17 +32,17 @@ int start_server()
 {
 	int client_sfd,i=0,port=7000;
 	socklen_t addrlen;
-	struct sockaddr_in address;
+	struct sockaddr_in server_addr,client_addr;
 	pthread_t threads[THREADS];
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
 		printf("[%s:%s:%d] %s\n",__FILE__,__func__,__LINE__,strerror(errno));
 again:
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(port);
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = INADDR_ANY;
+	server_addr.sin_port = htons(port);
 
-	if (bind(sfd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+	if (bind(sfd, (struct sockaddr*)&server_addr,sizeof(server_addr)) < 0) {
 		port++;
 		goto again;
 	}
@@ -53,7 +53,7 @@ again:
 	addrlen = sizeof(struct sockaddr_in);
 
 	while(1) {
-		client_sfd = accept(sfd,(struct sockaddr*)&address,&addrlen);
+		client_sfd = accept(sfd,(struct sockaddr*)&client_addr,&addrlen);
 		pthread_create(&threads[i++], NULL, connection, (void*)&client_sfd);
 	}
 	pthread_exit(NULL);
