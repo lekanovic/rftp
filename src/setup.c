@@ -51,7 +51,6 @@ again:
 			ERR("fork\n");
 
 		if (pid == 0) {
-			close(sfd);
 			printf("new client, sock =%d\n",client_sfd);
 			connection(&client_sfd);
 			printf("client exit, sock =%d\n",client_sfd);
