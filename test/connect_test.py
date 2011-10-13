@@ -81,7 +81,7 @@ def check_hash():
 def main():
 	create_big_file()
 
-	while True:
+	for i in range(0,5):
 		print "*** START NEW TEST ROUND ***"
 		connect_to_ftp()
 		stor_cmd_test()

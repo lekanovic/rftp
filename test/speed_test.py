@@ -63,6 +63,9 @@ def create_big_file():
 	hash_value = hash.hexdigest()
 	print hash_value
 
+def delete_big_file():
+	subprocess.call("rm big.bin", shell=True) #remove local file
+
 def main():
 	create_big_file()
 	connect_to_ftp()
@@ -76,6 +79,7 @@ def main():
 	print 'time to dwnld file %f sec' % ((time.time() - start))
 
 	dele_cmd_test()
+	delete_big_file()
 
 	close_connection()
 
