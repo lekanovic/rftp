@@ -37,6 +37,8 @@
 
 #define debug_print(args ...) if (DEBUG) fprintf(stderr, args)
 
+#define BUF_SIZE	1024
+
 static int parse_msg(int,char*);
 
 static ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
@@ -330,43 +332,27 @@ int handle_stor(int cmd_port, char *msg)
 }
 int handle_retr(int cmd_port, char* msg)
 {
-	char *buf;
-	int fd,file_size,bytes;
+	char buf[BUF_SIZE];
+	int fd,bytes;
 	char *file = msg + 5;
 
 	file[strlen(file)-1] = file[strlen(file)-2] = '\0';
 
 	if ((fd = open(file,O_RDONLY)) < 0) {
-		ERR("open\n")
 		ftp_send(cmd_port,FILE_UNAVAILABLE,strlen(FILE_UNAVAILABLE),0);
 		return 0;
 	}
 
-	if ((file_size = lseek(fd,0,SEEK_END)) < 0) {
-		ERR("lseek\n");
-	}
-
-	if (lseek(fd,0,SEEK_SET) < 0) {
-		ERR("lseek\n");
-	}
-
-	if ((buf = malloc(file_size)) == NULL) {
-		ERR("malloc\n");
-	}
-
-	if ((bytes = read(fd,buf,file_size)) < 0) {
-		ERR("read\n");
-	}
-
 	ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
 
-	ftp_send(data_fd,buf,file_size,0);
+	while ((bytes = read(fd,buf,BUF_SIZE)) != 0) {
+		ftp_send(data_fd,buf,bytes,0);
+	}
 
 	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
 	close(data_fd);
 	close(fd);
-	free(buf);
 
 	return 0;
 }
@@ -412,7 +398,6 @@ int handle_list(int cmd_port,char* msg)
 }
 int handle_pwd(int cmd_port)
 {
-#define BUF_SIZE	1024
 	char *msg;
 
 	msg = calloc(BUF_SIZE, sizeof(char));
