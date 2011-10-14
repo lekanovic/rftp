@@ -3,8 +3,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <signal.h>
-
+#include <unistd.h>
 #include "setup.h"
+
+int silent_mode = 0;
 
 void handler(int sig)
 {
@@ -12,9 +14,30 @@ void handler(int sig)
 	close_server();
 }
 
-int main()
+int parse_arg(int argc, char** argv)
+{
+	int c;
+
+	while ((c = getopt(argc, argv, "sabc:")) != -1) {
+		switch (c) {
+		case 's':
+			silent_mode=1;
+			break;
+		case 'b':
+			break;
+		case 'c':
+			break;
+		case '?':
+			break;
+		}
+	}
+	return 0;
+}
+
+int main(int argc, char** argv)
 {
 	signal(SIGINT, handler);
+	parse_arg(argc,argv);
 	start_server();
 	return 0;
 }
