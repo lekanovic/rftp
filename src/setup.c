@@ -55,7 +55,7 @@ again:
 		inet_ntoa(*((struct in_addr *)he->h_addr)),
 		port);
 
-	if (listen(sfd,3) < 0)
+	if (listen(sfd,5) < 0)
 		ERR("listen\n");
 
 	addrlen = sizeof(struct sockaddr_in);
@@ -76,6 +76,8 @@ again:
 				inet_ntoa(client_addr.sin_addr),
 				client_sfd);
 
+			close(sfd);
+
 			connection(&client_sfd);
 
 			/*
@@ -94,6 +96,10 @@ again:
 			printf("Disconnected %s:%d\n",
 				ipstr,
 				client_sfd);
+
+			close(client_sfd);
+
+			exit(0);
 		} else {
 			close(client_sfd);
 		}
