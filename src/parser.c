@@ -19,6 +19,12 @@
 
 #define BUF_SIZE	1024
 
+#if 0
+	#define DLOG(fmt, args...) printf("%s:%d "fmt,__FILE__,__LINE__,args)
+#else
+	#define DLOG(fmt, args...)
+#endif
+
 static int parse_msg(int,char*);
 
 int handle_msg(int client_sfd)
@@ -36,14 +42,12 @@ int handle_msg(int client_sfd)
 		}
 		response = parse_msg(client_sfd,buf);
 		if (response < 0) {
-			printf("Client exited, bye\n\r");
 			ftp_send(client_sfd,GOODBYE,strlen(GOODBYE),0);
 			break;
 		}
 
 		memset(buf,0,1024);
 	}
-	printf("echo msg exit\n");
 	return 0;
 }
 int data_fd;
@@ -51,119 +55,119 @@ int data_fd;
 static int parse_msg(int client_sfd,char* msg)
 {
 	if ( strstr(msg,"ABOR") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"ACCT") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"ALLO") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"APPE") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"AUTH") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CCC") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CDUP") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CONF") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CWD") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_cwd(client_sfd,msg);
 	} else if ( strstr(msg,"DELE") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_dele(client_sfd,msg);
 	} else if ( strstr(msg,"ENC") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"EPRT") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"FEAT") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"LANG") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"LIST") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		return handle_list(client_sfd,msg);
 	} else if ( strstr(msg,"LPRT") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"LPSV") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MDTM") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MIC") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MKD") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_mkd(client_sfd,msg);
 	} else if ( strstr(msg,"MLSD") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MLST") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MODE") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"NLST") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"NOOP") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"OPTS") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PASS") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_pass(client_sfd,msg);
 	} else if ( strstr(msg,"PASV") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		data_fd = handle_pasv(client_sfd);
-		printf("Passive port opened %d\n",data_fd);
+		DLOG("Passive port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PBSZ") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PORT") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		data_fd = handle_port(client_sfd,msg);
-		printf("Active port opened %d\n",data_fd);
+		DLOG("Active port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PROT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PWD") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_pwd(client_sfd);
 	} else if ( strstr(msg,"QUIT") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		return -1;
 	} else if ( strstr(msg,"REIN") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"REST") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"RETR") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_retr(client_sfd,msg);
 	} else if ( strstr(msg,"RMD") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_rmd(client_sfd,msg);
 	} else if ( strstr(msg,"RNFR") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"RNTO") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SITE") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SIZE") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SMNT") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STAT") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STOR") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_stor(client_sfd,msg);
 	} else if ( strstr(msg,"STOU") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STRU") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SYST") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_syst(client_sfd,msg);
 	} else if ( strstr(msg,"TYPE") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_type(client_sfd,msg);
 	} else if ( strstr(msg,"USER") != NULL) {
-		printf("%s %d %s\n",__func__,__LINE__,msg);
+		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_user(client_sfd,msg);
 	} else
 		return -1;
@@ -466,7 +470,6 @@ int echo_msg(int client_sfd)
 			printf("%s line %d\n",strerror(errno),__LINE__);
 
 		if (strstr(buf,"exit") != NULL) {
-			printf("client exits\n");
 		 	break;
 		}
 
@@ -474,7 +477,6 @@ int echo_msg(int client_sfd)
 
 		memset(buf,0,1024);
 	}
-	printf("echo msg exit\n");
 	return 0;
 }
 
