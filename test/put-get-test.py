@@ -5,7 +5,7 @@ import sys
 #http://docs.python.org/library/ftplib.html
 
 ftp = ftplib.FTP()
-ip='127.0.1.0'
+ip='127.0.1.1'
 port=7000
 
 def print_test_failed():
