@@ -5,6 +5,7 @@ import sys
 #http://docs.python.org/library/ftplib.html
 
 ftp = ftplib.FTP()
+ip='127.0.1.0'
 port=7000
 
 def print_test_failed():
@@ -14,7 +15,7 @@ def print_test_passed():
 	print "\033[01;34mTEST PASSED\033[0m"
 
 def connect_to_ftp():
-	ftp.connect('localhost',port)     #specify port number when connection
+	ftp.connect(ip,port)     #specify port number when connection
 	ftp.login('radovan','XXX')
 #	ftp.sendcmd('TYPE I')
 	#ftp.set_pasv(False)

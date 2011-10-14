@@ -6,6 +6,7 @@ import subprocess
 import md5
 
 ftp = ftplib.FTP()
+ip='127.0.1.1'
 port=7000
 
 
@@ -16,7 +17,7 @@ def print_test_passed():
 	print "\033[01;34mTEST PASSED\033[0m"
 
 def connect_to_ftp():
-	ftp.connect('localhost',port)     #specify port number when connection
+	ftp.connect(ip,port)     #specify port number when connection
 	ftp.login('radovan','XXX')
 	ftp.sendcmd('TYPE I')
 
