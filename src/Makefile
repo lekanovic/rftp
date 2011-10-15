@@ -1,12 +1,12 @@
 CC=gcc
-CFLAGS=-Iinc -pthread -Werror -Wall
+CFLAGS=-Iinc -pthread -lcrypt -Werror -Wall
 SRC=src/main.o \
     src/setup.o \
     src/parser.o \
-    src/passwd_file.o \
     src/file_op.o \
     src/mem_op.o \
-    src/connect.o
+    src/connect.o \
+    src/login.o
 
 build: $(SRC)
 	$(CC) -o server $(SRC) $(CFLAGS)

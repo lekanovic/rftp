@@ -16,8 +16,13 @@
 #include "err_print.h"
 #include "connect.h"
 #include "ftp_msg.h"
+#include "login.h"
 
 #define BUF_SIZE	1024
+
+#define NO_USER			(-2)
+#define WRONG_PASSWD		(-3)
+//http://mina.apache.org/ftpserver/ftp-commands.html
 
 #if 0
 	#define DLOG(fmt, args...) printf("%s:%d "fmt,__FILE__,__LINE__,args)
@@ -26,6 +31,8 @@
 #endif
 
 static int parse_msg(int,char*);
+int data_fd;
+char user_name[30];
 
 int handle_msg(int client_sfd)
 {
@@ -50,7 +57,6 @@ int handle_msg(int client_sfd)
 	}
 	return 0;
 }
-int data_fd;
 
 static int parse_msg(int client_sfd,char* msg)
 {
@@ -112,7 +118,7 @@ static int parse_msg(int client_sfd,char* msg)
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PASS") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
-		handle_pass(client_sfd,msg);
+		return handle_pass(client_sfd,msg);
 	} else if ( strstr(msg,"PASV") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		data_fd = handle_pasv(client_sfd);
@@ -168,7 +174,7 @@ static int parse_msg(int client_sfd,char* msg)
 		handle_type(client_sfd,msg);
 	} else if ( strstr(msg,"USER") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
-		handle_user(client_sfd,msg);
+		return handle_user(client_sfd,msg);
 	} else
 		return -1;
 
@@ -252,7 +258,17 @@ int handle_type(int cmd_port,char* msg)
 }
 int handle_pass(int cmd_port,char* msg)
 {
+	char* passwd = msg + 5;
+	passwd[strlen(passwd)-1] = passwd[strlen(passwd)-2] = '\0';
+
+	if (!check_passwd(user_name,passwd)) {
+		ftp_send(cmd_port,"530 Authentication failed.\r\n",
+				strlen("530 Authentication failed.\r\n"),0);
+		return WRONG_PASSWD;
+	}
+
 	ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
+
 	return 0;
 }
 int handle_syst(int cmd_port,char* msg)
@@ -262,7 +278,20 @@ int handle_syst(int cmd_port,char* msg)
 }
 int handle_user(int cmd_port,char* msg)
 {
-	ftp_send(cmd_port,LOGIN_MSG,strlen(LOGIN_MSG),0);
+	memset(user_name,0,30);
+	strcpy(user_name,msg + 5);
+
+	user_name[strlen(user_name)-1] = user_name[strlen(user_name)-2] = '\0';
+
+	if (!find_user(user_name)) {
+		ftp_send(cmd_port,"530 Invalid user name\r\n",
+				strlen("530 Invalid user name\r\n"),0);
+		return NO_USER;
+	}
+
+	ftp_send(cmd_port,"331 User name okay, need password.\r\n",
+			strlen("331 User name okay, need password.\r\n"),0);
+
 	return 0;
 }
 int handle_stor(int cmd_port, char *msg)
