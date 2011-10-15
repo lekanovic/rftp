@@ -16,7 +16,7 @@ def print_test_passed():
 
 def connect_to_ftp():
 	ftp.connect(ip,port)     #specify port number when connection
-	ftp.login('radovan','XXX')
+	ftp.login('tester','celeron')
 #	ftp.sendcmd('TYPE I')
 	#ftp.set_pasv(False)
 

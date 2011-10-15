@@ -34,13 +34,43 @@ static int parse_msg(int,char*);
 int data_fd;
 char user_name[30];
 
+int verify_login(int cmd_port)
+{
+	char msg[BUF_SIZE];
+	int bytes;
+	memset(msg,0,BUF_SIZE);
+
+	while (1) {
+		if ((bytes = ftp_recv(cmd_port,msg,BUF_SIZE,0)) == 0) {
+			printf("Client closed connection\n");
+			return 0;
+		}
+		if (strstr(msg,"USER") != NULL) {
+			if (handle_user(cmd_port,msg) == NO_USER) {
+				printf("%s %d\n",__func__,__LINE__);
+				return 0;
+			}
+		} else if ( strstr(msg,"PASS") != NULL) {
+			if (handle_pass(cmd_port,msg) == WRONG_PASSWD)
+				return 0;
+			else
+				return 1;
+		}
+		memset(msg,0,BUF_SIZE);
+	}
+}
+
 int handle_msg(int client_sfd)
 {
 	char buf[1024];
 	int bytes,response;
 
-	if (send(client_sfd,WELCOME_MSG,strlen(WELCOME_MSG),0) < 0)
-		printf("%s line %d\n",strerror(errno),__LINE__);
+	ftp_send(client_sfd,WELCOME_MSG,strlen(WELCOME_MSG),0);
+
+	if (!verify_login(client_sfd)){
+		ftp_send(client_sfd,GOODBYE,strlen(GOODBYE),0);
+		return 0;
+	}
 
 	while(1) {
 		if ((bytes = ftp_recv(client_sfd,buf,1024,0)) == 0) {
