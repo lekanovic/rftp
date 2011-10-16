@@ -5,6 +5,9 @@
 #include <sys/types.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
+#include <net/if.h>
+#include <arpa/inet.h>
+#include <sys/ioctl.h>
 #include "connect.h"
 #include "err_print.h"
 
@@ -47,3 +50,35 @@ ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
 	return bytes;
 }
 
+int get_ip_addr(struct in_addr *ip)
+{
+	struct ifreq buffer[32];
+	struct ifconf intfc;
+	struct ifreq *pIntfc;
+	int i,fd,num_intfc;
+
+	intfc.ifc_len = sizeof(buffer);
+	intfc.ifc_buf = (char*) buffer;
+
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+		ERR("socket\n");
+		return 0;
+	}
+
+	if (ioctl(fd, SIOCGIFCONF, &intfc) < 0) {
+		ERR("ioctl\n");
+		return 0;
+	}
+
+	pIntfc = intfc.ifc_req;
+	num_intfc = intfc.ifc_len / sizeof(struct ifreq);
+
+	for (i = 0; i < num_intfc; i++) {
+		struct ifreq *item = &(pIntfc[i]);
+
+		if (strstr(item->ifr_name,"eth") != NULL) {
+			*ip = (((struct sockaddr_in *)&item->ifr_addr)->sin_addr);
+		}
+	}
+	return 1;
+}
