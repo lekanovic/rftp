@@ -7,7 +7,8 @@ SRC=src/main.o \
     src/mem_op.o \
     src/connect.o \
     src/login.o \
-    src/time_op.o
+    src/time_op.o \
+    src/helpers.o
 
 build: $(SRC)
 	$(CC) -o server $(SRC) $(CFLAGS)
