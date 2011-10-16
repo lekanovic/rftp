@@ -223,13 +223,14 @@ int handle_dele(int cmd_port,char *msg)
 		ERR("unlink\n");
 	}
 
-	send_msg = calloc(25 + strlen(file), sizeof(char));
+	send_msg = ftp_calloc(25 + strlen(file), sizeof(char));
 
 	sprintf(send_msg,"250 %s has been deleted\r\n",file);
 
 	ftp_send(cmd_port,send_msg,strlen(send_msg),0);
 
-	free(send_msg);
+	ftp_free(send_msg);
+
 	return 0;
 }
 // RMD  <SP> <pathname> <CRLF>
@@ -244,16 +245,16 @@ int handle_rmd(int cmd_port,char* msg)
 
 	if ((ret=rmdir(dir)) < 0) {
 		ERR("rmdir\n");
-		send_msg = calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
+		send_msg = ftp_calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
 		sprintf(send_msg,"%s",FILE_UNAVAILABLE);
 	} else {
-		send_msg = calloc(strlen(FILE_ACTION_OK)+1,
+		send_msg = ftp_calloc(strlen(FILE_ACTION_OK)+1,
 				sizeof(char));
 		sprintf(send_msg,"%s",FILE_ACTION_OK);
 	}
 	ftp_send(cmd_port,send_msg,strlen(send_msg),0);
 
-	free(send_msg);
+	ftp_free(send_msg);
 	return 0;
 }
 int handle_mkd(int cmd_port,char* msg)
@@ -266,16 +267,16 @@ int handle_mkd(int cmd_port,char* msg)
 
 	if ((ret=mkdir(dir,S_IRWXU)) < 0) {
 		ERR("mkdir\n");
-		send_msg = calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
+		send_msg = ftp_calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
 		sprintf(send_msg,"%s",FILE_UNAVAILABLE);
 	} else {
-		send_msg = calloc(4+strlen(dir)+strlen("\'directory created\'")+1,
+		send_msg = ftp_calloc(4+strlen(dir)+strlen("\'directory created\'")+1,
 				 sizeof(char));
 		sprintf(send_msg,"257 %s directory created\r\n",dir);
 	}
 	ftp_send(cmd_port,send_msg,strlen(send_msg),0);
 
-	free(send_msg);
+	ftp_free(send_msg);
 	return 0;
 }
 int handle_type(int cmd_port,char* msg)
@@ -382,7 +383,7 @@ int handle_retr(int cmd_port, char* msg)
 int handle_cwd(int cmd_port,char* msg)
 {
 	char *str;
-	if ((str = calloc(strlen(msg),sizeof(char))) == NULL)
+	if ((str = ftp_calloc(strlen(msg),sizeof(char))) == NULL)
 		ERR("calloc\n");
 
 	strcpy(str,msg+4);
@@ -392,7 +393,7 @@ int handle_cwd(int cmd_port,char* msg)
 	if (chdir(str) < 0) {
 		ERR("chdir\n")
 	}
-	free(str);
+	ftp_free(str);
 
 	ftp_send(cmd_port,WORKING_DIR_CHANGED,strlen(WORKING_DIR_CHANGED),0);
 
@@ -424,7 +425,7 @@ int handle_pwd(int cmd_port)
 {
 	char *msg;
 
-	msg = calloc(BUF_SIZE, sizeof(char));
+	msg = ftp_calloc(BUF_SIZE, sizeof(char));
 
 	strcpy(msg, "257 ");
 
@@ -434,7 +435,7 @@ int handle_pwd(int cmd_port)
 
 	ftp_send(cmd_port,msg,strlen(msg),0);
 
-	free(msg);
+	ftp_free(msg);
 
 	return 0;
 }
