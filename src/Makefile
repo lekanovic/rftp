@@ -6,7 +6,8 @@ SRC=src/main.o \
     src/file_op.o \
     src/mem_op.o \
     src/connect.o \
-    src/login.o
+    src/login.o \
+    src/time_op.o
 
 build: $(SRC)
 	$(CC) -o server $(SRC) $(CFLAGS)
