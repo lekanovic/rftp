@@ -17,5 +17,8 @@
 #define ENTER_PASSV_MODE	"227 Entering Passive Mode\r\n"
 #define FILE_UNAVAILABLE	"550 Requested action not taken. File unavailable\r\n"
 #define FILE_ACTION_OK		"250 Requested file action okay, completed\r\n"
+#define AUTHEN_FAILED		"530 Authentication failed.\r\n"
+#define INVALID_USER_NAME	"530 Invalid user name\r\n"
+#define NEED_PASSWD		"331 User name okay, need password.\r\n"
 
 #endif

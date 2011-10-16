@@ -292,8 +292,8 @@ int handle_pass(int cmd_port,char* msg)
 	passwd[strlen(passwd)-1] = passwd[strlen(passwd)-2] = '\0';
 
 	if (!check_passwd(user_name,passwd)) {
-		ftp_send(cmd_port,"530 Authentication failed.\r\n",
-				strlen("530 Authentication failed.\r\n"),0);
+		ftp_send(cmd_port,AUTHEN_FAILED,
+				strlen(AUTHEN_FAILED),0);
 		return WRONG_PASSWD;
 	}
 
@@ -314,13 +314,13 @@ int handle_user(int cmd_port,char* msg)
 	user_name[strlen(user_name)-1] = user_name[strlen(user_name)-2] = '\0';
 
 	if (!find_user(user_name)) {
-		ftp_send(cmd_port,"530 Invalid user name\r\n",
-				strlen("530 Invalid user name\r\n"),0);
+		ftp_send(cmd_port,INVALID_USER_NAME,
+				strlen(INVALID_USER_NAME),0);
 		return NO_USER;
 	}
 
-	ftp_send(cmd_port,"331 User name okay, need password.\r\n",
-			strlen("331 User name okay, need password.\r\n"),0);
+	ftp_send(cmd_port,NEED_PASSWD,
+			strlen(NEED_PASSWD),0);
 
 	return 0;
 }
