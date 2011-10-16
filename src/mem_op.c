@@ -2,12 +2,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include "mem_op.h"
 /* from site:
  * http://stackoverflow.com/questions/852072/simple-c-implementation-to-track-memory-alloc-free */
 
 #define DEBUG 0
 
-#define debug_print(args ...) if (DEBUG) fprintf(stderr, args)
+#define debug_print(args ...) \
+	if (DEBUG) { \
+		fprintf(stderr, args); \
+		printf("total mem usage: %d\n",(int)get_used_mem()); \
+	}
+
 
 static size_t currentmemory	= 0;
 static size_t peakmemory	= 0;
@@ -21,6 +27,29 @@ size_t peak_mem()
 	return peakmemory;
 }
 
+void *ftp_calloc(size_t nmemb, size_t size)
+{
+	int s;
+	void* pmem = calloc(sizeof(size_t) + nmemb, size);
+
+	s = (nmemb * size);
+
+	if (pmem) {
+		size_t *psize = (size_t *)pmem;
+
+		memcpy(psize,&s,sizeof(size));
+
+		currentmemory += (nmemb * size);
+
+		if (currentmemory > peakmemory) {
+			peakmemory = currentmemory;
+		}
+		debug_print("calloc: size %d addr %p\n",s,(psize+1));
+		return (psize + 1);
+	}
+
+	return NULL;
+}
 
 void *ftp_alloc(size_t size)
 {
@@ -36,7 +65,7 @@ void *ftp_alloc(size_t size)
 		if (currentmemory > peakmemory) {
 			peakmemory = currentmemory;
 		}
-		debug_print("alloc: %p\n",(psize + 1));
+		debug_print("alloc: size %d addr %p\n",(int)size,(psize+1));
 		return(psize + 1);
 	}
 
@@ -50,10 +79,10 @@ void  ftp_free(void *pmem)
 		// Get the size
 		--psize;
 
-		assert(currentmemory >= *psize);
+		//assert(currentmemory >= *psize);
 
 		currentmemory -= *psize;
-		debug_print("free: %p\n",psize);
+		debug_print("free: size %d addr %p\n",(int)*psize,psize);
 		free(psize);
 	}
 }
