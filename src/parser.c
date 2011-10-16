@@ -62,7 +62,7 @@ int verify_login(int cmd_port)
 
 int handle_msg(int client_sfd)
 {
-	char buf[1024];
+	char buf[BUF_SIZE];
 	int bytes,response;
 
 	ftp_send(client_sfd,WELCOME_MSG,strlen(WELCOME_MSG),0);
@@ -73,7 +73,7 @@ int handle_msg(int client_sfd)
 	}
 
 	while(1) {
-		if ((bytes = ftp_recv(client_sfd,buf,1024,0)) == 0) {
+		if ((bytes = ftp_recv(client_sfd,buf,BUF_SIZE,0)) == 0) {
 			printf("Client closed connection\n");
 			return 0;
 		}
@@ -83,7 +83,7 @@ int handle_msg(int client_sfd)
 			break;
 		}
 
-		memset(buf,0,1024);
+		memset(buf,0,BUF_SIZE);
 	}
 	return 0;
 }
@@ -328,8 +328,8 @@ int handle_stor(int cmd_port, char *msg)
 {
 	int fd,bytes,data;
 	char *file = msg + 5;
-	char buf[1024];
-	memset(buf,0,1024);
+	char buf[BUF_SIZE];
+	memset(buf,0,BUF_SIZE);
 	file[strlen(file)-1] = file[strlen(file)-2] = '\0';//remove \r\n
 
 	ftp_send(cmd_port,START_STOR_CMD,strlen(START_STOR_CMD),0);
@@ -337,7 +337,7 @@ int handle_stor(int cmd_port, char *msg)
 	if ((fd=open(file,O_CREAT|O_RDWR,S_IRWXU)) < 0)
 		ERR("open\n");
 
-	while ((data=ftp_recv(data_fd,buf,1024,0)) != 0) {
+	while ((data=ftp_recv(data_fd,buf,BUF_SIZE,0)) != 0) {
 		if ((bytes=write(fd,buf,data)) < 0)
 			ERR("write\n");
 		lseek(fd,0,SEEK_END);
@@ -448,11 +448,11 @@ int handle_pasv(int cmd_port)
 {
 	int sfd,client_pasv;
 	int port=45584,a=178,b=16;
-	char msg[1024];
+	char msg[BUF_SIZE];
 	struct sockaddr_in address;
 	socklen_t addrlen;
 
-	memset(msg,0,1024);
+	memset(msg,0,BUF_SIZE);
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
 		ERR("socket\n");
@@ -511,14 +511,14 @@ int handle_port(int cmd_port,char* msg)
 
 int echo_msg(int client_sfd)
 {
-	char buf[1024];
+	char buf[BUF_SIZE];
 	int bytes;
 
 	if (send(client_sfd,WELCOME_MSG,strlen(WELCOME_MSG),0) < 0)
 		printf("%s line %d\n",strerror(errno),__LINE__);
 
 	while(1) {
-		if ((bytes = recv(client_sfd,buf,1024,0)) < 0)
+		if ((bytes = recv(client_sfd,buf,BUF_SIZE,0)) < 0)
 			printf("%s line %d\n",strerror(errno),__LINE__);
 		else if (bytes == 0) {//Client closed connection
 			printf("Client closed connection\n");
@@ -534,7 +534,7 @@ int echo_msg(int client_sfd)
 
 		printf("[DATA] %s\n",buf);
 
-		memset(buf,0,1024);
+		memset(buf,0,BUF_SIZE);
 	}
 	return 0;
 }
