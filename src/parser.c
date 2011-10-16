@@ -10,6 +10,7 @@
 #include <dirent.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include "helpers.h"
 #include "parser.h"
 #include "mem_op.h"
 #include "file_op.h"
@@ -216,7 +217,7 @@ int handle_dele(int cmd_port,char *msg)
 	int ret;
 	char *send_msg,*file = msg + 5;
 
-	file[strlen(file)-1] = file[strlen(file)-2] = '\0';
+	rm_crlf(file);
 
 	if ((ret=unlink(file)) < 0) {
 		ERR("unlink\n");
@@ -238,7 +239,8 @@ int handle_rmd(int cmd_port,char* msg)
 	int ret;
 	char* send_msg;
 	char* dir = msg + 4;
-	dir[strlen(dir)-1] = dir[strlen(dir)-2] = '\0';//remove \r\n
+
+	rm_crlf(dir);
 
 	if ((ret=rmdir(dir)) < 0) {
 		ERR("rmdir\n");
@@ -260,7 +262,7 @@ int handle_mkd(int cmd_port,char* msg)
 	char* dir = msg + 4;
 	int ret;
 
-	dir[strlen(dir)-1] = dir[strlen(dir)-2] = '\0';//remove \r\n
+	rm_crlf(dir);
 
 	if ((ret=mkdir(dir,S_IRWXU)) < 0) {
 		ERR("mkdir\n");
@@ -289,7 +291,8 @@ int handle_type(int cmd_port,char* msg)
 int handle_pass(int cmd_port,char* msg)
 {
 	char* passwd = msg + 5;
-	passwd[strlen(passwd)-1] = passwd[strlen(passwd)-2] = '\0';
+
+	rm_crlf(passwd);
 
 	if (!check_passwd(user_name,passwd)) {
 		ftp_send(cmd_port,AUTHEN_FAILED,
@@ -311,7 +314,7 @@ int handle_user(int cmd_port,char* msg)
 	memset(user_name,0,30);
 	strcpy(user_name,msg + 5);
 
-	user_name[strlen(user_name)-1] = user_name[strlen(user_name)-2] = '\0';
+	rm_crlf(user_name);
 
 	if (!find_user(user_name)) {
 		ftp_send(cmd_port,INVALID_USER_NAME,
@@ -330,7 +333,8 @@ int handle_stor(int cmd_port, char *msg)
 	char *file = msg + 5;
 	char buf[BUF_SIZE];
 	memset(buf,0,BUF_SIZE);
-	file[strlen(file)-1] = file[strlen(file)-2] = '\0';//remove \r\n
+
+	rm_crlf(file);
 
 	ftp_send(cmd_port,START_STOR_CMD,strlen(START_STOR_CMD),0);
 
@@ -355,7 +359,7 @@ int handle_retr(int cmd_port, char* msg)
 	int fd,bytes;
 	char *file = msg + 5;
 
-	file[strlen(file)-1] = file[strlen(file)-2] = '\0';
+	rm_crlf(file);
 
 	if ((fd = open(file,O_RDONLY)) < 0) {
 		ftp_send(cmd_port,FILE_UNAVAILABLE,strlen(FILE_UNAVAILABLE),0);
@@ -382,7 +386,8 @@ int handle_cwd(int cmd_port,char* msg)
 		ERR("calloc\n");
 
 	strcpy(str,msg+4);
-	str[strlen(str)-2] = '\0';
+
+	rm_crlf(str);
 
 	if (chdir(str) < 0) {
 		ERR("chdir\n")
