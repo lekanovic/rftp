@@ -15,3 +15,13 @@ int rm_crlf(char* str)
 
 	return ret;
 }
+
+void replace(char*ip)
+{
+	int i;
+	char *tmp = ip;
+	for (i=0; tmp[i] != '\0';i++) {
+		if( tmp[i] == '.')
+			tmp[i] = ',';
+	}
+}

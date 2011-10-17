@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include "err_print.h"
 #include "parser.h"
+#include "connect.h"
 
 static int sfd;
 
@@ -41,7 +42,7 @@ again:
 	}
 
 	server_addr.sin_family = AF_INET;
-	memcpy(&server_addr.sin_addr,he->h_addr_list[0],he->h_length);
+	get_ip_addr(&server_addr.sin_addr);
 	server_addr.sin_port = htons(port);
 
 	if (bind(sfd, (struct sockaddr*)&server_addr,sizeof(server_addr)) < 0) {
@@ -52,7 +53,7 @@ again:
 	printf("Server: %s %s %s:%d\n",
 		he->h_name,
 		hostname,
-		inet_ntoa(*((struct in_addr *)he->h_addr)),
+		inet_ntoa(server_addr.sin_addr),
 		port);
 
 	if (listen(sfd,5) < 0)

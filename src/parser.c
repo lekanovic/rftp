@@ -443,6 +443,7 @@ static int getport(int a,int b)
 {
 	return (a*256 + b);
 }
+
 /*
  * passive FTP :
  *     command : client >1023 -> server 21
@@ -455,6 +456,7 @@ int handle_pasv(int cmd_port)
 	int sfd,client_pasv;
 	int port=45584,a=178,b=16;
 	char msg[BUF_SIZE];
+	char *ip;
 	struct sockaddr_in address;
 	socklen_t addrlen;
 
@@ -466,7 +468,7 @@ again:
 	port = getport(a,b);
 
 	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
+	get_ip_addr(&address.sin_addr);
 	address.sin_port = htons(port);
 
 	if (bind(sfd, (struct sockaddr*)&address, sizeof(address)) < 0) {
@@ -478,7 +480,11 @@ again:
 
 	addrlen = sizeof(struct sockaddr_in);
 
-	sprintf(msg,"227 Entering Passive Mode (127,0,0,1,%d,%d)\r\n",a,b);
+	ip = inet_ntoa(address.sin_addr);
+
+	replace(ip);
+
+	sprintf(msg,"227 Entering Passive Mode (%s,%d,%d)\r\n",ip,a,b);
 
 	ftp_send(cmd_port,msg,strlen(msg),0);
 
@@ -501,10 +507,9 @@ int handle_port(int cmd_port,char* msg)
 		ip[i++] = atoi(pch);
 		pch = strtok(NULL," ,");
 	}
-
+	get_ip_addr(&serv_addr.sin_addr);
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(ip[4]*256+ip[5]);
-	serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 	fd = socket(AF_INET,SOCK_STREAM,0);
 	if (connect(fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
@@ -544,8 +549,3 @@ int echo_msg(int client_sfd)
 	}
 	return 0;
 }
-
-
-
-
-
