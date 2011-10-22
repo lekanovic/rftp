@@ -497,8 +497,11 @@ int handle_port(int cmd_port,char* msg)
 {
 	int fd;
 	char* pch;
+	char buf[20];
 	int ip[6],i=0;
 	struct sockaddr_in serv_addr;
+
+	memset(buf,0,20);
 
 	pch = strtok(msg," ,");
 	pch = strtok(NULL," ,");
@@ -507,9 +510,14 @@ int handle_port(int cmd_port,char* msg)
 		ip[i++] = atoi(pch);
 		pch = strtok(NULL," ,");
 	}
-	get_ip_addr(&serv_addr.sin_addr);
+
+	sprintf(buf,"%d.%d.%d.%d",ip[0],ip[1],ip[2],ip[3]);
+
+	serv_addr.sin_addr.s_addr = inet_addr(buf);
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(ip[4]*256+ip[5]);
+
+	DLOG("Connecting to %s:%d\n",inet_ntoa(serv_addr.sin_addr),serv_addr.sin_port);
 
 	fd = socket(AF_INET,SOCK_STREAM,0);
 	if (connect(fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
