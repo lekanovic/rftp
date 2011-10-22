@@ -4,6 +4,7 @@ import sys
 import time
 import subprocess
 import md5
+import os
 
 #http://docs.python.org/library/ftplib.html
 
@@ -36,6 +37,7 @@ def retr_cmd_test(p):
 	except Exception,e:
 		print e
 		print_test_failed()
+
 def create_big_file():
 	global hash_value
 	print "Creating big.bin file"
@@ -63,25 +65,17 @@ def dele_cmd_test():
 def main(p):
 	print "*** Download TEST started ***"
 	connect_to_ftp()
+
+	create_big_file()
+	stor_cmd_test()
 	retr_cmd_test(p)
+	dele_cmd_test()
 	close_connection()
 	print "*** Download TEST done ***"
 
 if __name__ == "__main__":
-	if len(sys.argv) == 3:
-		port = sys.argv[1]
-		dir_path = sys.argv[2]
-	elif len(sys.argv) == 2:
-		if sys.argv[1] == '1':
-			connect_to_ftp()
-			create_big_file()
-			stor_cmd_test()
-			close_connection()
-		elif sys.argv[1] == '2':
-			connect_to_ftp()
-			dele_cmd_test()
-			close_connection()
-		exit(1)
-	else:
-		port = 7000
+	if len(sys.argv) == 4:
+		ip = sys.argv[1]
+		port = sys.argv[2]
+		dir_path = sys.argv[3]
 	main(dir_path)

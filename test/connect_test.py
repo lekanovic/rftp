@@ -93,9 +93,11 @@ def main():
 		time.sleep(2)
 
 if __name__ == "__main__":
-	if len(sys.argv) == 2:
-		port = sys.argv[1]
+	if len(sys.argv) == 3:
+		ip = sys.argv[1]
+		port = sys.argv[2]
 	else:
+		ip = "127.0.0.1"
 		port = 7000
 	main()
 
