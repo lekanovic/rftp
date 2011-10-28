@@ -128,6 +128,7 @@ static int parse_msg(int client_sfd,char* msg)
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"FEAT") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
+		handle_feat(client_sfd);
 	} else if ( strstr(msg,"LANG") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"LIST") != NULL) {
@@ -154,6 +155,7 @@ static int parse_msg(int client_sfd,char* msg)
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"NOOP") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
+		handle_noop(client_sfd);
 	} else if ( strstr(msg,"OPTS") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PASS") != NULL) {
@@ -218,6 +220,16 @@ static int parse_msg(int client_sfd,char* msg)
 	} else
 		return -1;
 
+	return 0;
+}
+int handle_noop(int cmd_port)
+{
+	ftp_send(cmd_port,SEND_OK,strlen(SEND_OK),0);
+	return 0;
+}
+int handle_feat(int cmd_port)
+{
+	ftp_send(cmd_port,FEAT_NOT_IMPLEMENTED,strlen(FEAT_NOT_IMPLEMENTED),0);
 	return 0;
 }
 // DELE <SP> <pathname> <CRLF>

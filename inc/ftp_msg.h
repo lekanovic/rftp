@@ -21,5 +21,6 @@
 #define AUTHEN_FAILED		"530 Authentication failed.\r\n"
 #define INVALID_USER_NAME	"530 Invalid user name\r\n"
 #define NEED_PASSWD		"331 User name okay, need password.\r\n"
-
+#define FEAT_NOT_IMPLEMENTED	"211 no-features\r\n"
+#define SEND_OK			"200 Server okay\r\n"
 #endif
