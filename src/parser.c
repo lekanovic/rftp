@@ -35,6 +35,15 @@ static int parse_msg(int,char*);
 int data_fd;
 char user_name[30];
 
+enum SEND_TYPE {
+	ascii,
+	ebcdic,
+	image,
+	local
+};
+
+enum SEND_TYPE send_mode=ascii;
+
 int verify_login(int cmd_port)
 {
 	char msg[BUF_SIZE];
@@ -281,12 +290,19 @@ int handle_mkd(int cmd_port,char* msg)
 }
 int handle_type(int cmd_port,char* msg)
 {
-	if ( strstr(msg,"TYPE A") != NULL)
+	if ( strstr(msg,"TYPE A") != NULL) {
+		send_mode=ascii;
 		ftp_send(cmd_port,TYPE_ASCII_MODE,strlen(TYPE_ASCII_MODE),0);
-	else if ( strstr(msg,"TYPE I") != NULL)
+	} else if ( strstr(msg,"TYPE I") != NULL) {
 		ftp_send(cmd_port,TYPE_BINARY_MODE,strlen(TYPE_BINARY_MODE),0);
-	else
+		send_mode=image;
+	} else if ( strstr(msg,"TYPE E") != NULL) {
+		send_mode=ebcdic;
+		ftp_send(cmd_port,TYPE_EBCDIC_MODE,strlen(TYPE_EBCDIC_MODE),0);
+	} else {
 		ERR("No TYPE\n");
+	}
+
 	return 0;
 }
 int handle_pass(int cmd_port,char* msg)
