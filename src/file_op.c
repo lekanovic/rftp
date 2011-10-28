@@ -16,7 +16,7 @@
 
 static const char *get_perms(mode_t mode);
 
-char** ls()
+char** ls(int name_only)
 {
 	DIR* dir;
 	struct dirent *dp;
@@ -50,6 +50,12 @@ char** ls()
 		/* Get entry's information. */
 		if (stat(dp->d_name, &statbuf) == -1)
 			continue;
+
+		/* We only want file names */
+		if ( name_only) {
+			sprintf(line[i],"%s\r\n",dp->d_name);
+			continue;
+		}
 
 		/* Print out type, permissions, and number of links. */
 		sprintf(line[i],"%10.10s", get_perms(statbuf.st_mode));

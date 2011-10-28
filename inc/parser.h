@@ -18,4 +18,5 @@ int handle_rmd(int,char*);
 int handle_dele(int,char*);
 int handle_feat(int);
 int handle_noop(int);
+int handle_nlst(int);
 #endif

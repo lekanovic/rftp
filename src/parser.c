@@ -153,6 +153,7 @@ static int parse_msg(int client_sfd,char* msg)
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"NLST") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
+		handle_nlst(client_sfd);
 	} else if ( strstr(msg,"NOOP") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		handle_noop(client_sfd);
@@ -219,6 +220,27 @@ static int parse_msg(int client_sfd,char* msg)
 		return handle_user(client_sfd,msg);
 	} else
 		return -1;
+
+	return 0;
+}
+int handle_nlst(int cmd_port)
+{
+	int i=0;
+	char **ppdir;
+
+	ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+
+	if ((ppdir=ls(ONLY_FILE_NAMES)) != NULL) {
+		for (i=0; ppdir[i] != NULL;i++){
+			ftp_send(data_fd,ppdir[i],strlen(ppdir[i]),0);
+			ftp_free(ppdir[i]);
+		}
+		ftp_free(ppdir);
+	}
+
+	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+
+	close(data_fd);
 
 	return 0;
 }
@@ -435,7 +457,7 @@ int handle_list(int cmd_port,char* msg)
 
 	ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
 
-	if ((ppdir=ls()) != NULL) {
+	if ((ppdir=ls(!ONLY_FILE_NAMES)) != NULL) {
 		for (i=0; ppdir[i] != NULL;i++){
 			ftp_send(data_fd,ppdir[i],strlen(ppdir[i]),0);
 			ftp_free(ppdir[i]);
