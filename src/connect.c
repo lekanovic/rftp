@@ -34,7 +34,7 @@ ssize_t ftp_recv(int sockfd, void *buf, size_t len, int flags)
 	if ((bytes = recv(sockfd,buf,len,flags)) < 0)
 		ERR("recv\n");
 
-	debug_print("\033[01;31m[DATA:recv:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
+	debug_print("\033[01;31m[DATA:recv:fd=%d] %s\033[0m",sockfd,(char*)buf);
 
 	return bytes;
 }
@@ -42,7 +42,7 @@ ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
 {
 	int bytes;
 
-	debug_print("\033[01;34m[DATA:send:fd=%d] %s\033[0m\n",sockfd,(char*)buf);
+	debug_print("\033[01;34m[DATA:send:fd=%d] %s\033[0m",sockfd,(char*)buf);
 
 	if ((bytes = send(sockfd,buf,len,flags)) < 0)
 		ERR("send\n");
