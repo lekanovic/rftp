@@ -20,4 +20,12 @@ int handle_feat(int);
 int handle_noop(int);
 int handle_nlst(int);
 int handle_size(int,char*);
+
+enum SEND_TYPE {
+	ascii,
+	ebcdic,
+	image,
+	local
+};
+
 #endif

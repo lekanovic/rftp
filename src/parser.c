@@ -35,13 +35,6 @@ static int parse_msg(int,char*);
 int data_fd;
 char user_name[30];
 
-enum SEND_TYPE {
-	ascii,
-	ebcdic,
-	image,
-	local
-};
-
 enum SEND_TYPE send_mode=ascii;
 
 int verify_login(int cmd_port)
