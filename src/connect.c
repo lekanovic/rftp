@@ -10,6 +10,9 @@
 #include <sys/ioctl.h>
 #include "connect.h"
 #include "err_print.h"
+#include "parser.h"
+#include "mem_op.h"
+#include "helpers.h"
 
 #define DEBUG 0
 
@@ -49,7 +52,25 @@ ssize_t ftp_send(int sockfd, const void *buf, size_t len, int flags)
 
 	return bytes;
 }
+ssize_t ftp_send_mode(int sockfd, const void *b, size_t len, int flags,enum SEND_TYPE mode)
+{
+	if ( mode == ascii) {
+		char* buf;
 
+		buf = replace_str((char*)b,"\n","\r\n");
+
+		ftp_send(sockfd,buf,strlen(buf),0);
+
+	} else if ( mode == image) {
+		ftp_send(sockfd,b,len,0);
+	} else if ( mode == ebcdic) {
+
+	} else if ( mode == local) {
+
+	}
+
+	return 0;
+}
 int get_ip_addr(struct in_addr *ip)
 {
 	struct ifreq buffer[32];

@@ -434,10 +434,18 @@ int handle_retr(int cmd_port, char* msg)
 		return 0;
 	}
 
-	ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
+	if ( send_mode == ascii) {
+		ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+	} else if ( send_mode == image) {
+		ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
+	} else if ( send_mode == ebcdic) {
+		ftp_send(cmd_port,OPEN_EBCDIC_MODE,strlen(OPEN_EBCDIC_MODE),0);
+	} else if ( send_mode == local) {
+
+	}
 
 	while ((bytes = read(fd,buf,BUF_SIZE)) != 0) {
-		ftp_send(data_fd,buf,bytes,0);
+		ftp_send_mode(data_fd,buf,bytes,0,send_mode);
 	}
 
 	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);

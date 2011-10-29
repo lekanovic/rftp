@@ -10,6 +10,7 @@
 #define OPEN_BINARY_MODE	"150 Opening binary mode data connection\r\n"
 #define TYPE_BINARY_MODE	"200 Opening binary mode data connection\r\n"
 #define TYPE_EBCDIC_MODE	"200 Opening EBCDIC mode data connection\r\n"
+#define OPEN_EBCDIC_MODE	"150 Opening EBCDIC mode data connection\r\n"
 #define WORKING_DIR_CHANGED	"200 Working directory changed\r\n"
 #define TRANSFER_COMPLETE	"226 Transfer complete\r\n"
 #define GOODBYE			"221 Goodbye\r\n"
