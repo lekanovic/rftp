@@ -198,6 +198,7 @@ static int parse_msg(int client_sfd,char* msg)
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SIZE") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
+		handle_size(client_sfd,msg);
 	} else if ( strstr(msg,"SMNT") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STAT") != NULL) {
@@ -218,8 +219,31 @@ static int parse_msg(int client_sfd,char* msg)
 	} else if ( strstr(msg,"USER") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		return handle_user(client_sfd,msg);
-	} else
+	} else if ( strstr(msg,"EPSV") != NULL) {
+		ftp_send(client_sfd,COMMAND_NOT_UNDERSTOOD, strlen(COMMAND_NOT_UNDERSTOOD),0);
+	} else {
 		return -1;
+	}
+
+	return 0;
+}
+int handle_size(int cmd_port,char *msg)
+{
+	char buf[BUF_SIZE];
+	struct stat st;
+	int fd;
+	char *file = msg + 5;
+
+	memset(buf,0,BUF_SIZE);
+
+	rm_crlf(file);
+
+	if ((fd=stat(file,&st)) < 0)
+		ERR("stat\n");
+
+	sprintf(buf,"213 %d\r\n",(int)st.st_size);
+
+	ftp_send(cmd_port,buf,strlen(buf),0);
 
 	return 0;
 }

@@ -23,4 +23,5 @@
 #define NEED_PASSWD		"331 User name okay, need password.\r\n"
 #define FEAT_NOT_IMPLEMENTED	"211 no-features\r\n"
 #define SEND_OK			"200 Server okay\r\n"
+#define COMMAND_NOT_UNDERSTOOD	"500 command not understood\r\n"
 #endif
