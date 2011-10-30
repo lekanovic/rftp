@@ -33,12 +33,22 @@ def pwd_cmd_test():
 		print_test_passed()
 
 def cwd_cmd_test():
+	if ftp.sendcmd('MKD test') != "257 test directory created":
+		print_test_failed()
+	else:
+		print_test_passed()
+
 	if ftp.sendcmd('CWD test') != "200 Working directory changed":
 		print_test_failed()
 	else:
 		print_test_passed()
 
 	if ftp.sendcmd('CWD ..') != "200 Working directory changed":
+		print_test_failed()
+	else:
+		print_test_passed()
+
+	if ftp.sendcmd('RMD test') != "250 Requested file action okay, completed":
 		print_test_failed()
 	else:
 		print_test_passed()
