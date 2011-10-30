@@ -12,6 +12,9 @@
 #include "parser.h"
 #include "connect.h"
 
+#define HOSTNAME_LEN	200
+#define SERVER_PORT	7000
+
 static int sfd;
 
 void connection(void* argument)
@@ -25,8 +28,8 @@ void connection(void* argument)
 
 int start_server()
 {
-	char hostname[200];
-	int client_sfd,pid=0,port=7000,ret=0;
+	char hostname[HOSTNAME_LEN];
+	int client_sfd,pid=0,port=SERVER_PORT,ret=0;
 	socklen_t addrlen;
 	struct sockaddr_in server_addr,client_addr;
 	struct hostent *he;
@@ -34,7 +37,7 @@ int start_server()
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
 		ERR("socket\n");
 again:
-	if ((ret = gethostname(hostname,200)) < 0)
+	if ((ret = gethostname(hostname,HOSTNAME_LEN)) < 0)
 		ERR("gethostname\n");
 
 	if ((he = gethostbyname(hostname)) == NULL) {
