@@ -20,6 +20,7 @@
 #include "login.h"
 
 #define BUF_SIZE	1024
+#define USER_NAME_LEN	30
 
 #define NO_USER			(-2)
 #define WRONG_PASSWD		(-3)
@@ -31,13 +32,12 @@
 	#define DLOG(fmt, args...)
 #endif
 
-static int parse_msg(int,char*);
+static int parse_msg(int,char*,char*);
 int data_fd;
-char user_name[30];
 
 enum SEND_TYPE send_mode=ascii;
 
-int verify_login(int cmd_port)
+static int verify_login(int cmd_port, char* user_name)
 {
 	char msg[BUF_SIZE];
 	int bytes;
@@ -49,12 +49,12 @@ int verify_login(int cmd_port)
 			return 0;
 		}
 		if (strstr(msg,"USER") != NULL) {
-			if (handle_user(cmd_port,msg) == NO_USER) {
+			if (handle_user(cmd_port,msg,user_name) == NO_USER) {
 				printf("%s %d\n",__func__,__LINE__);
 				return 0;
 			}
 		} else if ( strstr(msg,"PASS") != NULL) {
-			if (handle_pass(cmd_port,msg) == WRONG_PASSWD)
+			if (handle_pass(cmd_port,msg,user_name) == WRONG_PASSWD)
 				return 0;
 			else {
 				printf("HOME: %s\n",get_home_dir(user_name));
@@ -67,12 +67,13 @@ int verify_login(int cmd_port)
 
 int handle_msg(int client_sfd)
 {
+	char user_name[USER_NAME_LEN];
 	char buf[BUF_SIZE];
 	int bytes,response;
 
 	ftp_send(client_sfd,WELCOME_MSG,strlen(WELCOME_MSG),0);
 
-	if (!verify_login(client_sfd)){
+	if (!verify_login(client_sfd,user_name)){
 		ftp_send(client_sfd,GOODBYE,strlen(GOODBYE),0);
 		return 0;
 	}
@@ -82,7 +83,7 @@ int handle_msg(int client_sfd)
 			printf("Client closed connection\n");
 			return 0;
 		}
-		response = parse_msg(client_sfd,buf);
+		response = parse_msg(client_sfd,buf,user_name);
 		if (response < 0) {
 			ftp_send(client_sfd,GOODBYE,strlen(GOODBYE),0);
 			break;
@@ -93,7 +94,7 @@ int handle_msg(int client_sfd)
 	return 0;
 }
 
-static int parse_msg(int client_sfd,char* msg)
+static int parse_msg(int client_sfd,char* msg,char* user_name)
 {
 	if ( strstr(msg,"ABOR") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
@@ -156,7 +157,7 @@ static int parse_msg(int client_sfd,char* msg)
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PASS") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
-		return handle_pass(client_sfd,msg);
+		return handle_pass(client_sfd,msg,user_name);
 	} else if ( strstr(msg,"PASV") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
 		data_fd = handle_pasv(client_sfd);
@@ -213,7 +214,7 @@ static int parse_msg(int client_sfd,char* msg)
 		handle_type(client_sfd,msg);
 	} else if ( strstr(msg,"USER") != NULL) {
 		DLOG("%s %d %s\n",__func__,__LINE__,msg);
-		return handle_user(client_sfd,msg);
+		return handle_user(client_sfd,msg,user_name);
 	} else if ( strstr(msg,"EPSV") != NULL) {
 		ftp_send(client_sfd,COMMAND_NOT_UNDERSTOOD, strlen(COMMAND_NOT_UNDERSTOOD),0);
 	} else {
@@ -358,7 +359,7 @@ int handle_type(int cmd_port,char* msg)
 
 	return 0;
 }
-int handle_pass(int cmd_port,char* msg)
+int handle_pass(int cmd_port,char* msg,char* user_name)
 {
 	char* passwd = msg + 5;
 
@@ -379,7 +380,7 @@ int handle_syst(int cmd_port,char* msg)
 	ftp_send(cmd_port,SYSTEM_TYPE,strlen(SYSTEM_TYPE),0);
 	return 0;
 }
-int handle_user(int cmd_port,char* msg)
+int handle_user(int cmd_port,char* msg,char* user_name)
 {
 	memset(user_name,0,30);
 	strcpy(user_name,msg + 5);
