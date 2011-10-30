@@ -57,7 +57,10 @@ static int verify_login(int cmd_port, char* user_name)
 			if (handle_pass(cmd_port,msg,user_name) == WRONG_PASSWD)
 				return 0;
 			else {
-				printf("HOME: %s\n",get_home_dir(user_name));
+				char *dir = get_home_dir(user_name);
+				printf("HOME: %s\n",dir);
+				if (chdir(dir) < 0)
+					ERR("chdir\n");
 				return 1;
 			}
 		}
