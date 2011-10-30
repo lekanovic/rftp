@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "login.h"
-
+extern struct passwd *getpwent (void);
 #define NOT_FOUND	0
 #define OP_OK		1
 
@@ -37,4 +37,10 @@ int check_passwd(const char* name, const char* passwd)
 		return NOT_FOUND;
 
 	return OP_OK;
+}
+
+char* get_home_dir(const char* name)
+{
+	struct passwd *ps=getpwnam(name);
+	return ps->pw_dir;
 }

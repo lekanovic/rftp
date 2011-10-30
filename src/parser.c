@@ -56,8 +56,10 @@ int verify_login(int cmd_port)
 		} else if ( strstr(msg,"PASS") != NULL) {
 			if (handle_pass(cmd_port,msg) == WRONG_PASSWD)
 				return 0;
-			else
+			else {
+				printf("HOME: %s\n",get_home_dir(user_name));
 				return 1;
+			}
 		}
 		memset(msg,0,BUF_SIZE);
 	}
