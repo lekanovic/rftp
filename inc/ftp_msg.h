@@ -4,7 +4,7 @@
 #define LOG_IN_OK		"230 Welcome to server\r\n"
 #define WELCOME_MSG		"220 Raddes ftp server beta v1.0\r\n"
 #define LOGIN_MSG		"331 Anonymous access allowed\r\n"
-#define SYSTEM_TYPE		"215 LINUX-2.6\r\n"
+#define SYSTEM_TYPE		"215 UNIX Type: L8\r\n"
 #define OPEN_ASCII_MODE		"150 Opening ASCII mode data connection\r\n"
 #define TYPE_ASCII_MODE		"200 Opening ASCII mode data connection\r\n"
 #define OPEN_BINARY_MODE	"150 Opening binary mode data connection\r\n"

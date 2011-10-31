@@ -351,8 +351,8 @@ int handle_type(int cmd_port,char* msg)
 		send_mode=ascii;
 		ftp_send(cmd_port,TYPE_ASCII_MODE,strlen(TYPE_ASCII_MODE),0);
 	} else if ( strstr(msg,"TYPE I") != NULL) {
-		ftp_send(cmd_port,TYPE_BINARY_MODE,strlen(TYPE_BINARY_MODE),0);
 		send_mode=image;
+		ftp_send(cmd_port,TYPE_BINARY_MODE,strlen(TYPE_BINARY_MODE),0);
 	} else if ( strstr(msg,"TYPE E") != NULL) {
 		send_mode=ebcdic;
 		ftp_send(cmd_port,TYPE_EBCDIC_MODE,strlen(TYPE_EBCDIC_MODE),0);
@@ -485,16 +485,28 @@ int handle_list(int cmd_port,char* msg)
 {
 	int i=0;
 	char **ppdir;
+	char data[5*1024];
+	memset(data,0,5*1024);
 
-	ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+	if ( send_mode == ascii) {
+		ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+	} else if ( send_mode == image) {
+		ftp_send(cmd_port,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
+	} else if ( send_mode == ebcdic) {
+		ftp_send(cmd_port,OPEN_EBCDIC_MODE,strlen(OPEN_EBCDIC_MODE),0);
+	} else if ( send_mode == local) {
+
+	}
 
 	if ((ppdir=ls(!ONLY_FILE_NAMES)) != NULL) {
 		for (i=0; ppdir[i] != NULL;i++){
-			ftp_send(data_fd,ppdir[i],strlen(ppdir[i]),0);
+			strcat(data,ppdir[i]);
 			ftp_free(ppdir[i]);
 		}
 		ftp_free(ppdir);
 	}
+
+	ftp_send_mode(data_fd,data,strlen(data),0,send_mode);
 
 	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
