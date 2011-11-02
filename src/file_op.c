@@ -78,7 +78,7 @@ char** ls(int name_only)
 		tm = localtime(&statbuf.st_mtime);
 
 		/* Get localized date string. */
-		strftime(datestring, sizeof(datestring), nl_langinfo(D_T_FMT), tm);
+		strftime(datestring, sizeof(datestring),"%b %d %H:%M", tm);
 		sprintf(line[i] + strlen(line[i])," %s %s\r\n", datestring, dp->d_name);
 	}
 	closedir(dir);
