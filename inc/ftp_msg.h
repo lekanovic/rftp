@@ -25,4 +25,5 @@
 #define FEAT_NOT_IMPLEMENTED	"211 no-features\r\n"
 #define SEND_OK			"200 Server okay\r\n"
 #define COMMAND_NOT_UNDERSTOOD	"500 command not understood\r\n"
+#define NOT_AN_DIRECTORY	"550 This is not an directory\r\n"
 #endif

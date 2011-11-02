@@ -473,10 +473,12 @@ int handle_cwd(int cmd_port,char* msg)
 
 	if (chdir(str) < 0) {
 		ERR("chdir\n")
+		ftp_send(cmd_port,NOT_AN_DIRECTORY,strlen(NOT_AN_DIRECTORY),0);
+	} else {
+		ftp_send(cmd_port,WORKING_DIR_CHANGED,strlen(WORKING_DIR_CHANGED),0);
 	}
-	ftp_free(str);
 
-	ftp_send(cmd_port,WORKING_DIR_CHANGED,strlen(WORKING_DIR_CHANGED),0);
+	ftp_free(str);
 
 	return 0;
 
