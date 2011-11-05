@@ -10,6 +10,7 @@
 #include <dirent.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <time.h>
 #include "helpers.h"
 #include "parser.h"
 #include "mem_op.h"
@@ -369,8 +370,11 @@ int handle_pass(int cmd_port,char* msg,char* user_name)
 	if (!check_passwd(user_name,passwd)) {
 		ftp_send(cmd_port,AUTHEN_FAILED,
 				strlen(AUTHEN_FAILED),0);
+		DLOG("User %s typed incorrect passwd: %s\n",user_name,passwd);
 		return WRONG_PASSWD;
 	}
+
+	DLOG("User %s logged in successfully\n",user_name);
 
 	ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
 
@@ -404,6 +408,8 @@ int handle_stor(int cmd_port, char *msg)
 	int fd,bytes,data;
 	char *file = msg + 5;
 	char buf[BUF_SIZE]={0};
+	time_t start,finish;
+	struct stat st;
 
 	rm_crlf(file);
 
@@ -412,11 +418,23 @@ int handle_stor(int cmd_port, char *msg)
 	if ((fd=open(file,O_CREAT|O_RDWR,S_IRWXU)) < 0)
 		ERR("open\n");
 
+	start = time(NULL);
+
 	while ((data=ftp_recv(data_fd,buf,BUF_SIZE,0)) != 0) {
 		if ((bytes=write(fd,buf,data)) < 0)
 			ERR("write\n");
 		lseek(fd,0,SEEK_END);
 	}
+
+	finish = time(NULL) - start;
+
+	if (stat(file,&st) < 0)
+		ERR("stat\n");
+
+	DLOG("File %s %d bytes received in %ldsec\n",
+		file,
+		(int)st.st_size,
+		(long)finish);
 
 	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
@@ -428,7 +446,9 @@ int handle_retr(int cmd_port, char* msg)
 {
 	char buf[BUF_SIZE];
 	int fd,bytes;
+	time_t start,finish;
 	char *file = msg + 5;
+	struct stat st;
 
 	rm_crlf(file);
 
@@ -447,9 +467,21 @@ int handle_retr(int cmd_port, char* msg)
 
 	}
 
+	start = time(NULL);
+
 	while ((bytes = read(fd,buf,BUF_SIZE)) != 0) {
 		ftp_send_mode(data_fd,buf,bytes,0,send_mode);
 	}
+
+	finish = time(NULL) - start;
+
+	if (stat(file,&st) < 0)
+		ERR("stat\n");
+
+	DLOG("File %s %d bytes sent in %ldsec\n",
+		file,
+		(int)st.st_size,
+		(long)finish);
 
 	ftp_send(cmd_port,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
