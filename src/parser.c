@@ -228,12 +228,10 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 }
 int handle_size(int cmd_port,char *msg)
 {
-	char buf[BUF_SIZE];
+	char buf[BUF_SIZE]={0};
 	struct stat st;
 	int fd;
 	char *file = msg + 5;
-
-	memset(buf,0,BUF_SIZE);
 
 	rm_crlf(file);
 
@@ -405,8 +403,7 @@ int handle_stor(int cmd_port, char *msg)
 {
 	int fd,bytes,data;
 	char *file = msg + 5;
-	char buf[BUF_SIZE];
-	memset(buf,0,BUF_SIZE);
+	char buf[BUF_SIZE]={0};
 
 	rm_crlf(file);
 
@@ -487,8 +484,7 @@ int handle_list(int cmd_port,char* msg)
 {
 	int i=0;
 	char **ppdir;
-	char data[5*1024];
-	memset(data,0,5*1024);
+	char data[5*1024]={0};
 
 	if ( send_mode == ascii) {
 		ftp_send(cmd_port,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
@@ -550,12 +546,10 @@ int handle_pasv(int cmd_port)
 {
 	int sfd,client_pasv;
 	int port=45584,a=178,b=16;
-	char msg[BUF_SIZE];
+	char msg[BUF_SIZE]={0};
 	char *ip;
 	struct sockaddr_in address;
 	socklen_t addrlen;
-
-	memset(msg,0,BUF_SIZE);
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
 		ERR("socket\n");
@@ -592,11 +586,9 @@ int handle_port(int cmd_port,char* msg)
 {
 	int fd;
 	char* pch;
-	char buf[20];
+	char buf[20]={0};
 	int ip[6],i=0;
 	struct sockaddr_in serv_addr;
-
-	memset(buf,0,20);
 
 	pch = strtok(msg," ,");
 	pch = strtok(NULL," ,");
