@@ -8,12 +8,14 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include "helpers.h"
 #include "err_print.h"
 #include "parser.h"
 #include "connect.h"
+#include "mem_op.h"
 
 #define HOSTNAME_LEN	200
-#define SERVER_PORT	7000
+#define SERVER_PORT	21
 
 static int sfd;
 
@@ -28,7 +30,7 @@ void connection(void* argument)
 
 static int handle_incomming_clients()
 {
-	int pid=0,ret=0;
+	int pid=0;
 	int client_sfd;
 	socklen_t addrlen;
 	struct sockaddr_in client_addr;
@@ -42,9 +44,7 @@ static int handle_incomming_clients()
 		ERR("fork\n");
 
 	if (pid == 0) {
-		char ipstr[100];
-		struct sockaddr_in disconn_addr;
-		socklen_t addr_len;
+		char ipstr[20];
 
 		printf("Connected %s:%d\n",
 			inet_ntoa(client_addr.sin_addr),
@@ -54,18 +54,7 @@ static int handle_incomming_clients()
 
 		connection(&client_sfd);
 
-		/*
-		 * This is an bug in getpeername socklen_t is 8 bytes
-		 * the library code expects 4 bytes so the struct was
-		 * no populated because it was too short. So extra 4
-		 * had to be added.
-		*/
-		addr_len = sizeof(addr_len) + 4;
-
-		if ((ret=getpeername(client_sfd,(struct sockaddr *)&disconn_addr,&addr_len)) < 0 )
-			ERR("getpeername\n");
-
-		inet_ntop(AF_INET,&disconn_addr.sin_addr,ipstr,sizeof(ipstr));
+		get_ip_adress(client_sfd,ipstr);
 
 		printf("Disconnected %s:%d\n",
 			ipstr,

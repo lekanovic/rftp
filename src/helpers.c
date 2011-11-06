@@ -3,7 +3,40 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <arpa/inet.h>
+#include "err_print.h"
 
+int get_ip_adress(int client_sfd,char* p)
+{
+	char ipstr[20];
+	int ret=0;
+	socklen_t addr_len;
+	struct sockaddr_in user_addr;
+
+	/*
+	 * This is an bug in getpeername socklen_t is 8 bytes
+	 * the library code expects 4 bytes so the struct was
+	 * no populated because it was too short. So extra 4
+	 * had to be added.
+	*/
+	addr_len = sizeof(addr_len) + 4;
+
+	if ((ret=getpeername(client_sfd,(struct sockaddr *)&user_addr,&addr_len)) < 0 ) {
+		ERR("getpeername\n");
+		return -1;
+	}
+
+	if (inet_ntop(AF_INET,&user_addr.sin_addr,ipstr,sizeof(ipstr)) == NULL) {
+		ERR("inet_ntop\n");
+		return -1;
+	}
+
+	strcpy(p,ipstr);
+
+	printf("ip: %s\n",ipstr);
+
+	return 0;
+}
 int rm_crlf(char* str)
 {
 	int len,ret=0;

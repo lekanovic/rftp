@@ -29,7 +29,11 @@
 
 extern int debug_mode;
 
-#define DLOG(fmt, args...) if (debug_mode) printf("%s:%d "fmt,__FILE__,__LINE__,args)
+
+#define DLOG(fmt, args...) \
+	if (debug_mode) { \
+		printf("%s:%d "fmt,__FILE__,__LINE__,args); \
+	}
 
 static int parse_msg(int,char*,char*);
 int data_fd;
