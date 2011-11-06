@@ -409,13 +409,16 @@ int handle_user(int cmd_port,char* msg,char* user_name)
 }
 int handle_stor(int cmd_port, char *msg)
 {
-	int fd,bytes,data;
-	char *file = msg + 5;
-	char buf[BUF_SIZE]={0};
+	int fd,bytes,data,buf_size;
+	char *buf,*file = msg + 5;
 	time_t start,finish;
 	struct stat st;
 
 	rm_crlf(file);
+
+	buf_size = get_recvbuf_size(cmd_port);
+
+	buf = ftp_alloc(buf_size);
 
 	ftp_send(cmd_port,START_STOR_CMD,strlen(START_STOR_CMD),0);
 
@@ -424,7 +427,7 @@ int handle_stor(int cmd_port, char *msg)
 
 	start = time(NULL);
 
-	while ((data=ftp_recv(data_fd,buf,BUF_SIZE,0)) != 0) {
+	while ((data=ftp_recv(data_fd,buf,buf_size,0)) != 0) {
 		if ((bytes=write(fd,buf,data)) < 0)
 			ERR("write\n");
 		lseek(fd,0,SEEK_END);
@@ -444,17 +447,22 @@ int handle_stor(int cmd_port, char *msg)
 
 	close(fd);
 	close(data_fd);
+	ftp_free(buf);
+
 	return 0;
 }
 int handle_retr(int cmd_port, char* msg)
 {
-	char buf[BUF_SIZE];
-	int fd,bytes;
+	int fd,bytes,buf_size;
 	time_t start,finish;
-	char *file = msg + 5;
+	char *buf,*file = msg + 5;
 	struct stat st;
 
 	rm_crlf(file);
+
+	buf_size = get_recvbuf_size(cmd_port);
+
+	buf = ftp_alloc(buf_size);
 
 	if ((fd = open(file,O_RDONLY)) < 0) {
 		ftp_send(cmd_port,FILE_UNAVAILABLE,strlen(FILE_UNAVAILABLE),0);
@@ -473,7 +481,7 @@ int handle_retr(int cmd_port, char* msg)
 
 	start = time(NULL);
 
-	while ((bytes = read(fd,buf,BUF_SIZE)) != 0) {
+	while ((bytes = read(fd,buf,buf_size)) != 0) {
 		ftp_send_mode(data_fd,buf,bytes,0,send_mode);
 	}
 
@@ -491,6 +499,7 @@ int handle_retr(int cmd_port, char* msg)
 
 	close(data_fd);
 	close(fd);
+	ftp_free(buf);
 
 	return 0;
 }

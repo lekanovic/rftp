@@ -4,8 +4,34 @@
 #include <stdlib.h>
 #include <time.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "err_print.h"
 
+int get_sendbuf_size(int sock)
+{
+	int optval;
+	socklen_t optlen;
+
+	optlen = sizeof(optval);
+
+	if (getsockopt(sock,SOL_SOCKET,SO_SNDBUF,(void*)&optval,&optlen) < 0)
+		ERR("getsockopt\n");
+
+	return optval;
+}
+int get_recvbuf_size(int sock)
+{
+	int optval;
+	socklen_t optlen;
+
+	optlen = sizeof(optval);
+
+	if (getsockopt(sock,SOL_SOCKET,SO_RCVBUF,(void*)&optval,&optlen) < 0)
+		ERR("getsockopt\n");
+
+	return optval;
+}
 int get_ip_address(int client_sfd,char* p)
 {
 	char ipstr[20];
