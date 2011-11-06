@@ -60,7 +60,7 @@ static int verify_login(int cmd_port, char* user_name)
 		}
 		if (strstr(msg,"USER") != NULL) {
 			if (handle_user(cmd_port,msg,user_name) == NO_USER) {
-				DLOG("%s is trying to login\n",user_name);
+				PLOG(cmd_port,"%s is trying to login\n",user_name);
 				return 0;
 			}
 		} else if ( strstr(msg,"PASS") != NULL) {
@@ -379,11 +379,11 @@ int handle_pass(int cmd_port,char* msg,char* user_name)
 	if (!check_passwd(user_name,passwd)) {
 		ftp_send(cmd_port,AUTHEN_FAILED,
 				strlen(AUTHEN_FAILED),0);
-		DLOG("User %s typed incorrect passwd: %s\n",user_name,passwd);
+		PLOG(cmd_port,"User %s typed incorrect passwd: %s\n",user_name,passwd);
 		return WRONG_PASSWD;
 	}
 
-	DLOG("User %s logged in successfully\n",user_name);
+	PLOG(cmd_port,"User %s logged in successfully\n",user_name);
 
 	ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
 
@@ -404,7 +404,7 @@ int handle_user(int cmd_port,char* msg,char* user_name)
 	if (!find_user(user_name)) {
 		ftp_send(cmd_port,INVALID_USER_NAME,
 				strlen(INVALID_USER_NAME),0);
-		DLOG("%s could not be found\n",user_name);
+		PLOG(cmd_port,"%s could not be found\n",user_name);
 		return NO_USER;
 	}
 
@@ -441,7 +441,7 @@ int handle_stor(int cmd_port, char *msg)
 	if (stat(file,&st) < 0)
 		ERR("stat\n");
 
-	DLOG("File %s %d bytes received in %ldsec\n",
+	PLOG(cmd_port,"File %s %d bytes received in %ldsec\n",
 		file,
 		(int)st.st_size,
 		(long)finish);
@@ -488,7 +488,7 @@ int handle_retr(int cmd_port, char* msg)
 	if (stat(file,&st) < 0)
 		ERR("stat\n");
 
-	DLOG("File %s %d bytes sent in %ldsec\n",
+	PLOG(cmd_port,"File %s %d bytes sent in %ldsec\n",
 		file,
 		(int)st.st_size,
 		(long)finish);
@@ -646,7 +646,7 @@ int handle_port(int cmd_port,char* msg)
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(ip[4]*256+ip[5]);
 
-	DLOG("Connecting to %s:%d\n",inet_ntoa(serv_addr.sin_addr),serv_addr.sin_port);
+	PLOG(cmd_port,"Connecting to %s:%d\n",inet_ntoa(serv_addr.sin_addr),serv_addr.sin_port);
 
 	fd = socket(AF_INET,SOCK_STREAM,0);
 	if (connect(fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
