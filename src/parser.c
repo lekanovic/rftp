@@ -49,7 +49,7 @@ static int verify_login(int cmd_port, char* user_name)
 		}
 		if (strstr(msg,"USER") != NULL) {
 			if (handle_user(cmd_port,msg,user_name) == NO_USER) {
-				printf("%s %d\n",__func__,__LINE__);
+				DLOG("%s is trying to login\n",user_name);
 				return 0;
 			}
 		} else if ( strstr(msg,"PASS") != NULL) {
@@ -57,7 +57,7 @@ static int verify_login(int cmd_port, char* user_name)
 				return 0;
 			else {
 				char *dir = get_home_dir(user_name);
-				printf("HOME: %s\n",dir);
+				DLOG("HOME: %s\n",dir);
 				if (chdir(dir) < 0)
 					ERR("chdir\n");
 				return 1;
