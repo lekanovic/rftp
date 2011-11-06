@@ -37,7 +37,7 @@ extern int debug_mode;
 	}
 
 static int parse_msg(int,char*,char*);
-int data_fd;
+static int data_fd;
 
 enum SEND_TYPE send_mode=ascii;
 
