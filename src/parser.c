@@ -27,11 +27,9 @@
 #define WRONG_PASSWD		(-3)
 //http://mina.apache.org/ftpserver/ftp-commands.html
 
-#if 0
-	#define DLOG(fmt, args...) printf("%s:%d "fmt,__FILE__,__LINE__,args)
-#else
-	#define DLOG(fmt, args...)
-#endif
+extern int debug_mode;
+
+#define DLOG(fmt, args...) if (debug_mode) printf("%s:%d "fmt,__FILE__,__LINE__,args)
 
 static int parse_msg(int,char*,char*);
 int data_fd;
@@ -72,7 +70,7 @@ static int verify_login(int cmd_port, char* user_name)
 int handle_msg(int client_sfd)
 {
 	char user_name[USER_NAME_LEN];
-	char buf[BUF_SIZE];
+	char buf[BUF_SIZE]={0};
 	int bytes,response;
 
 	ftp_send(client_sfd,WELCOME_MSG,strlen(WELCOME_MSG),0);
