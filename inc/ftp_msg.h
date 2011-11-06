@@ -26,4 +26,5 @@
 #define SEND_OK			"200 Server okay\r\n"
 #define COMMAND_NOT_UNDERSTOOD	"500 command not understood\r\n"
 #define NOT_AN_DIRECTORY	"550 This is not an directory\r\n"
+#define CANNOT_OPEN_DATA_CON	"425 Cannot open data connection\r\n"
 #endif

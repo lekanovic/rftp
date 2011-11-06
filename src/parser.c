@@ -167,7 +167,10 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 		return handle_pass(client_sfd,msg,user_name);
 	} else if ( strstr(msg,"PASV") != NULL) {
 		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
-		data_fd = handle_pasv(client_sfd);
+		if ((data_fd = handle_pasv(client_sfd)) < 0) {
+			ftp_send(client_sfd,CANNOT_OPEN_DATA_CON,
+					strlen(CANNOT_OPEN_DATA_CON),0);
+		}
 		PLOG(client_sfd,"Passive port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PBSZ") != NULL) {
 		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
@@ -622,7 +625,8 @@ again:
 
 	ftp_send(cmd_port,msg,strlen(msg),0);
 
-	client_pasv = accept(sfd,(struct sockaddr*)&address,&addrlen);
+	if ((client_pasv = accept(sfd,(struct sockaddr*)&address,&addrlen)) < 0)
+		ERR("accept\n");
 
 	return client_pasv;
 }
