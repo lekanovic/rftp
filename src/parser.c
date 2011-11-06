@@ -393,6 +393,7 @@ int handle_user(int cmd_port,char* msg,char* user_name)
 	if (!find_user(user_name)) {
 		ftp_send(cmd_port,INVALID_USER_NAME,
 				strlen(INVALID_USER_NAME),0);
+		DLOG("%s could not be found\n",user_name);
 		return NO_USER;
 	}
 
@@ -645,32 +646,4 @@ int handle_port(int cmd_port,char* msg)
 	return fd;
 }
 
-int echo_msg(int client_sfd)
-{
-	char buf[BUF_SIZE];
-	int bytes;
 
-	if (send(client_sfd,WELCOME_MSG,strlen(WELCOME_MSG),0) < 0)
-		printf("%s line %d\n",strerror(errno),__LINE__);
-
-	while(1) {
-		if ((bytes = recv(client_sfd,buf,BUF_SIZE,0)) < 0)
-			printf("%s line %d\n",strerror(errno),__LINE__);
-		else if (bytes == 0) {//Client closed connection
-			printf("Client closed connection\n");
-			return 0;
-		}
-
-		if (send(client_sfd,buf,strlen(buf),0) < 0)
-			printf("%s line %d\n",strerror(errno),__LINE__);
-
-		if (strstr(buf,"exit") != NULL) {
-		 	break;
-		}
-
-		printf("[DATA] %s\n",buf);
-
-		memset(buf,0,BUF_SIZE);
-	}
-	return 0;
-}
