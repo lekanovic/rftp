@@ -29,12 +29,6 @@
 
 extern int debug_mode;
 
-
-#define DLOG(fmt, args...) \
-	if (debug_mode) { \
-		printf("%s:%d "fmt,__FILE__,__LINE__,args); \
-	}
-
 #define PLOG(sock,fmt, args...) \
 	if (debug_mode) { \
 		char ipstr[20]; \
@@ -68,7 +62,7 @@ static int verify_login(int cmd_port, char* user_name)
 				return 0;
 			else {
 				char *dir = get_home_dir(user_name);
-				DLOG("HOME: %s\n",dir);
+				PLOG(cmd_port,"HOME: %s\n",dir);
 				if (chdir(dir) < 0)
 					ERR("chdir\n");
 				return 1;
