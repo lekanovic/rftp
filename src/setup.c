@@ -54,7 +54,7 @@ static int handle_incomming_clients()
 
 		connection(&client_sfd);
 
-		get_ip_adress(client_sfd,ipstr);
+		get_ip_address(client_sfd,ipstr);
 
 		printf("Disconnected %s:%d\n",
 			ipstr,

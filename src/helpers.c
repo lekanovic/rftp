@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include "err_print.h"
 
-int get_ip_adress(int client_sfd,char* p)
+int get_ip_address(int client_sfd,char* p)
 {
 	char ipstr[20];
 	int ret=0;
@@ -32,8 +32,6 @@ int get_ip_adress(int client_sfd,char* p)
 	}
 
 	strcpy(p,ipstr);
-
-	printf("ip: %s\n",ipstr);
 
 	return 0;
 }
