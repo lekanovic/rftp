@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Iinc -pthread -lcrypt -Werror -Wall
+CFLAGS=-Iinc -pthread -lcrypt -Werror -Wall -Wno-unused-but-set-variable
 SRC=src/main.o \
     src/setup.o \
     src/parser.o \
