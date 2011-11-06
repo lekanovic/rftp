@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include "setup.h"
 
-int silent_mode = 0;
+int debug_mode = 0;
 
 void handler(int sig)
 {
@@ -18,10 +18,11 @@ int parse_arg(int argc, char** argv)
 {
 	int c;
 
-	while ((c = getopt(argc, argv, "sabc:")) != -1) {
+	while ((c = getopt(argc, argv, "abcd")) != -1) {
 		switch (c) {
-		case 's':
-			silent_mode=1;
+		case 'd':
+			printf("usgin debug mode\n");
+			debug_mode=1;
 			break;
 		case 'b':
 			break;
