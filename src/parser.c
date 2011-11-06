@@ -578,10 +578,6 @@ int handle_pwd(int cmd_port)
 
 	return 0;
 }
-static int getport(int a,int b)
-{
-	return (a*256 + b);
-}
 
 /*
  * passive FTP :

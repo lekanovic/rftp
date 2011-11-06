@@ -8,6 +8,10 @@
 #include <sys/socket.h>
 #include "err_print.h"
 
+int getport(int a,int b)
+{
+	return (a*256 + b);
+}
 int get_sendbuf_size(int sock)
 {
 	int optval;

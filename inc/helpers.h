@@ -7,4 +7,5 @@ int64_t timespecDiff(struct timespec *, struct timespec *);
 int get_ip_address(int,char*);
 int get_sendbuf_size(int);
 int get_recvbuf_size(int);
+int getport(int,int);
 #endif
