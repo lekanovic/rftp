@@ -101,5 +101,7 @@ int get_ip_addr(struct in_addr *ip)
 			*ip = (((struct sockaddr_in *)&item->ifr_addr)->sin_addr);
 		}
 	}
+
+	close(fd);
 	return 1;
 }
