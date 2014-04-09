@@ -4,6 +4,7 @@ import sys
 import time
 import subprocess
 import md5
+import os
 
 ftp = ftplib.FTP()
 ip='127.0.1.1'
@@ -67,17 +68,24 @@ def create_big_file():
 def delete_big_file():
 	subprocess.call("rm big.bin", shell=True) #remove local file
 
+def get_file_size(filename):
+	return os.path.getsize('big.bin')
+
 def main():
 	create_big_file()
+	file_size = get_file_size('big.bin')/1000000
 	connect_to_ftp()
 	print "*** START SPEED TEST ***"
 	start = time.time()
 	stor_cmd_test()
-	print 'time to upload file %f sec' % ((time.time() - start))
+	delta = (time.time() - start)
+	print 'time to upload file %f sec, sped %d MB/s' % (delta,file_size/delta)
 
 	start = time.time()
 	retr_cmd_test()
-	print 'time to dwnld file %f sec' % ((time.time() - start))
+	delta = (time.time() - start)
+	print 'time to dwnld file %f sec, speed %d MB/s' % (delta,file_size/delta)
+
 
 	dele_cmd_test()
 	delete_big_file()
@@ -89,8 +97,8 @@ if __name__ == "__main__":
 		ip = sys.argv[1]
 		port = sys.argv[2]
 	else:
-		ip = "127.0.0.1"
-		port = 7000
+		ip = "10.97.0.112"
+		port = 21
 	main()
 
 
