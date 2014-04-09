@@ -3,6 +3,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "login.h"
 extern struct passwd *getpwent (void);
@@ -18,11 +19,11 @@ static int check_pass(const char *plainpw, const char *cryptpw)
 
 int find_user(const char* name)
 {
-	struct spwd *sp;
+	struct passwd *pw;
 
-	if ((sp = getspnam(name)) == NULL)
+	if ((pw = getpwnam(name)) == NULL) {
 		return NOT_FOUND;
-
+	}
 	return OP_OK;
 }
 
