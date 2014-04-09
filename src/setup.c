@@ -90,16 +90,19 @@ again:
 	get_ip_addr(&server_addr.sin_addr);
 	server_addr.sin_port = htons(port);
 
-	if (bind(sfd, (struct sockaddr*)&server_addr,sizeof(server_addr)) < 0) {
-		port++;
-		goto again;
-	}
 
 	printf("Server: %s %s %s:%d\n",
 		he->h_name,
 		hostname,
 		inet_ntoa(server_addr.sin_addr),
 		port);
+
+	if (bind(sfd, (struct sockaddr*)&server_addr,sizeof(server_addr)) < 0) {
+		port++;
+		sleep(1);
+		goto again;
+	}
+
 
 	if (listen(sfd,5) < 0)
 		ERR("listen\n");
