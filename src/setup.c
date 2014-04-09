@@ -100,6 +100,7 @@ again:
 	if (bind(sfd, (struct sockaddr*)&server_addr,sizeof(server_addr)) < 0) {
 		port++;
 		sleep(1);
+		perror("bind");
 		goto again;
 	}
 
