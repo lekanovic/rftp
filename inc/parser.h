@@ -20,6 +20,7 @@ int handle_feat(int);
 int handle_noop(int);
 int handle_nlst(int);
 int handle_size(int,char*);
+int handle_site(int,char*);
 
 enum SEND_TYPE {
 	ascii,

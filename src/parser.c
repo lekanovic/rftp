@@ -196,6 +196,7 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SITE") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		handle_site(client_sfd,msg);
 	} else if ( strstr(msg,"SIZE") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_size(client_sfd,msg);
@@ -225,6 +226,11 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 		return -1;
 	}
 
+	return 0;
+}
+int handle_site(int cmd_port,char *msg)
+{
+	ftp_send(cmd_port,FEAT_NOT_IMPLEMENTED,strlen(FEAT_NOT_IMPLEMENTED),0);
 	return 0;
 }
 int handle_size(int cmd_port,char *msg)
