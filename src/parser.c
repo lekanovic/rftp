@@ -19,6 +19,7 @@
 #include "connect.h"
 #include "ftp_msg.h"
 #include "login.h"
+#include "debug_print.h"
 
 #define BUF_SIZE	1024
 #define USER_NAME_LEN	30
@@ -26,15 +27,6 @@
 #define NO_USER			(-2)
 #define WRONG_PASSWD		(-3)
 //http://mina.apache.org/ftpserver/ftp-commands.html
-
-extern int debug_mode;
-
-#define PLOG(sock,fmt, args...) \
-	if (debug_mode) { \
-		char ipstr[20]; \
-		get_ip_address(sock,ipstr); \
-		printf("IP: %s %s:%d "fmt,ipstr,__FILE__,__LINE__,args); \
-	}
 
 static int parse_msg(int,char*,char*);
 static int data_fd;
@@ -54,7 +46,7 @@ static int verify_login(int cmd_port, char* user_name)
 		}
 		if (strstr(msg,"USER") != NULL) {
 			if (handle_user(cmd_port,msg,user_name) == NO_USER) {
-				PLOG(cmd_port,"%s is trying to login\n",user_name);
+				DEBUG_PRINT(cmd_port,"%s is trying to login\n",user_name);
 				return 0;
 			}
 		} else if ( strstr(msg,"PASS") != NULL) {
@@ -62,7 +54,7 @@ static int verify_login(int cmd_port, char* user_name)
 				return 0;
 			else {
 				char *dir = get_home_dir(user_name);
-				PLOG(cmd_port,"HOME: %s\n",dir);
+				DEBUG_PRINT(cmd_port,"HOME: %s\n",dir);
 				if (chdir(dir) < 0)
 					ERR("chdir\n");
 				return 1;
@@ -104,126 +96,126 @@ int handle_msg(int client_sfd)
 static int parse_msg(int client_sfd,char* msg,char* user_name)
 {
 	if ( strstr(msg,"ABOR") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"ACCT") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"ALLO") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"APPE") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"AUTH") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CCC") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CDUP") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CONF") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"CWD") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_cwd(client_sfd,msg);
 	} else if ( strstr(msg,"DELE") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_dele(client_sfd,msg);
 	} else if ( strstr(msg,"ENC") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"EPRT") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"FEAT") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_feat(client_sfd);
 	} else if ( strstr(msg,"LANG") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"LIST") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		return handle_list(client_sfd,msg);
 	} else if ( strstr(msg,"LPRT") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"LPSV") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MDTM") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MIC") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MKD") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_mkd(client_sfd,msg);
 	} else if ( strstr(msg,"MLSD") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MLST") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MODE") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"NLST") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_nlst(client_sfd);
 	} else if ( strstr(msg,"NOOP") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_noop(client_sfd);
 	} else if ( strstr(msg,"OPTS") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PASS") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		return handle_pass(client_sfd,msg,user_name);
 	} else if ( strstr(msg,"PASV") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		if ((data_fd = handle_pasv(client_sfd)) < 0) {
 			ftp_send(client_sfd,CANNOT_OPEN_DATA_CON,
 					strlen(CANNOT_OPEN_DATA_CON),0);
 		}
-		PLOG(client_sfd,"Passive port opened %d\n",data_fd);
+		DEBUG_PRINT(client_sfd,"Passive port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PBSZ") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PORT") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		data_fd = handle_port(client_sfd,msg);
-		PLOG(client_sfd,"Active port opened %d\n",data_fd);
+		DEBUG_PRINT(client_sfd,"Active port opened %d\n",data_fd);
 	} else if ( strstr(msg,"PROT") != NULL) {
 		printf("%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"PWD") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_pwd(client_sfd);
 	} else if ( strstr(msg,"QUIT") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		return -1;
 	} else if ( strstr(msg,"REIN") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"REST") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"RETR") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_retr(client_sfd,msg);
 	} else if ( strstr(msg,"RMD") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_rmd(client_sfd,msg);
 	} else if ( strstr(msg,"RNFR") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"RNTO") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SITE") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SIZE") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_size(client_sfd,msg);
 	} else if ( strstr(msg,"SMNT") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STAT") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STOR") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_stor(client_sfd,msg);
 	} else if ( strstr(msg,"STOU") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"STRU") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"SYST") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_syst(client_sfd,msg);
 	} else if ( strstr(msg,"TYPE") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_type(client_sfd,msg);
 	} else if ( strstr(msg,"USER") != NULL) {
-		PLOG(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		return handle_user(client_sfd,msg,user_name);
 	} else if ( strstr(msg,"EPSV") != NULL) {
 		ftp_send(client_sfd,COMMAND_NOT_UNDERSTOOD, strlen(COMMAND_NOT_UNDERSTOOD),0);
@@ -376,11 +368,11 @@ int handle_pass(int cmd_port,char* msg,char* user_name)
 	if (!check_passwd(user_name,passwd)) {
 		ftp_send(cmd_port,AUTHEN_FAILED,
 				strlen(AUTHEN_FAILED),0);
-		PLOG(cmd_port,"User %s typed incorrect passwd: %s\n",user_name,passwd);
+		DEBUG_PRINT(cmd_port,"User %s typed incorrect passwd: %s\n",user_name,passwd);
 		return WRONG_PASSWD;
 	}
 
-	PLOG(cmd_port,"User %s logged in successfully\n",user_name);
+	DEBUG_PRINT(cmd_port,"User %s logged in successfully\n",user_name);
 
 	ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
 
@@ -401,7 +393,7 @@ int handle_user(int cmd_port,char* msg,char* user_name)
 	if (!find_user(user_name)) {
 		ftp_send(cmd_port,INVALID_USER_NAME,
 				strlen(INVALID_USER_NAME),0);
-		PLOG(cmd_port,"%s could not be found\n",user_name);
+		DEBUG_PRINT(cmd_port,"%s could not be found\n",user_name);
 		return NO_USER;
 	}
 
@@ -441,7 +433,7 @@ int handle_stor(int cmd_port, char *msg)
 	if (stat(file,&st) < 0)
 		ERR("stat\n");
 
-	PLOG(cmd_port,"File %s %d bytes received in %ldsec\n",
+	DEBUG_PRINT(cmd_port,"File %s %d bytes received in %ldsec\n",
 		file,
 		(int)st.st_size,
 		(long)finish);
@@ -493,7 +485,7 @@ int handle_retr(int cmd_port, char* msg)
 	if (stat(file,&st) < 0)
 		ERR("stat\n");
 
-	PLOG(cmd_port,"File %s %d bytes sent in %ldsec\n",
+	DEBUG_PRINT(cmd_port,"File %s %d bytes sent in %ldsec\n",
 		file,
 		(int)st.st_size,
 		(long)finish);
@@ -649,7 +641,7 @@ int handle_port(int cmd_port,char* msg)
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(ip[4]*256+ip[5]);
 
-	PLOG(cmd_port,"Connecting to %s:%d\n",inet_ntoa(serv_addr.sin_addr),serv_addr.sin_port);
+	DEBUG_PRINT(cmd_port,"Connecting to %s:%d\n",inet_ntoa(serv_addr.sin_addr),serv_addr.sin_port);
 
 	fd = socket(AF_INET,SOCK_STREAM,0);
 	if (connect(fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
