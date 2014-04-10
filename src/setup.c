@@ -18,12 +18,16 @@
 #define SERVER_PORT	21
 
 static int sfd;
+extern int disable_nagle_algorithm;
 
 void connection(void* argument)
 {
 	int client_sfd;
 
 	client_sfd = *((int*)argument);
+
+	if (disable_nagle_algorithm)
+		disable_nagle(client_sfd);
 
 	handle_msg(client_sfd);
 }

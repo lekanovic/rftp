@@ -7,6 +7,7 @@
 #include "setup.h"
 
 int debug_mode = 0;
+int disable_nagle_algorithm = 0;
 
 void handler(int sig)
 {
@@ -18,13 +19,15 @@ int parse_arg(int argc, char** argv)
 {
 	int c;
 
-	while ((c = getopt(argc, argv, "abcd")) != -1) {
+	while ((c = getopt(argc, argv, "dnc")) != -1) {
 		switch (c) {
 		case 'd':
 			printf("using debug mode\n");
 			debug_mode=1;
 			break;
-		case 'b':
+		case 'n':
+			printf("disable Nagle's algorithm\n");
+			disable_nagle_algorithm = 1;
 			break;
 		case 'c':
 			break;
