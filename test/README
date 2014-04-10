@@ -3,4 +3,5 @@ Here is the command to run.
 User name must be "tester" and must have the password "celeron"
 
 	sudo useradd -d /home/tester -m tester
-	sudo passwd celeron
+	sudo passwd tester
+		Enter new UNIX password: celeron
