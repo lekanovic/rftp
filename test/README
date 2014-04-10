@@ -1,0 +1,6 @@
+Befor running the tests you must create an account for the tester with home directory.
+Here is the command to run. 
+User name must be "tester" and must have the password "celeron"
+
+	sudo useradd -d /home/tester -m tester
+	sudo passwd celeron
