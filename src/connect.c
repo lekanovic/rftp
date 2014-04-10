@@ -14,9 +14,9 @@
 #include "mem_op.h"
 #include "helpers.h"
 
-#define DEBUG 0
+extern int debug_mode;
 
-#define debug_print(args ...) if (DEBUG) fprintf(stderr, args)
+#define debug_print(args ...) if (debug_mode) fprintf(stderr, args)
 
 int disable_nagle(int cmd_port)
 {
