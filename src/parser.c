@@ -558,11 +558,11 @@ int handle_pwd(int cmd_port)
 
 	msg = ftp_calloc(BUF_SIZE, sizeof(char));
 
-	strcpy(msg, "257 ");
+	strcpy(msg, "257 \"");
 
 	getcwd(msg+strlen(msg),BUF_SIZE);
 
-	strcat(msg,"\r\n");
+	strcat(msg,"\" is the current directory.\r\n");
 
 	ftp_send(cmd_port,msg,strlen(msg),0);
 
