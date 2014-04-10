@@ -6,10 +6,10 @@
 /* from site:
  * http://stackoverflow.com/questions/852072/simple-c-implementation-to-track-memory-alloc-free */
 
-#define DEBUG 0
+extern int debug_mode;
 
 #define debug_print(args ...) \
-	if (DEBUG) { \
+	if (debug_mode) { \
 		fprintf(stderr, args); \
 		printf("total mem usage: %d\n",(int)get_used_mem()); \
 	}
