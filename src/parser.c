@@ -59,6 +59,8 @@ static int verify_login(int cmd_port, char* user_name)
 					ERR("chdir\n");
 				return 1;
 			}
+		}  else if ( strstr(msg,"FEAT") != NULL) {
+			handle_feat(cmd_port);
 		}
 		memset(msg,0,BUF_SIZE);
 	}
