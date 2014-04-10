@@ -99,6 +99,8 @@ int get_ip_addr(struct in_addr *ip)
 
 		if (strstr(item->ifr_name,"eth") != NULL) {
 			*ip = (((struct sockaddr_in *)&item->ifr_addr)->sin_addr);
+		} else if (strstr(item->ifr_name,"wlan") != NULL) {
+			*ip = (((struct sockaddr_in *)&item->ifr_addr)->sin_addr);
 		}
 	}
 
