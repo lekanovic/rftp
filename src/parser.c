@@ -192,8 +192,10 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 		handle_rmd(client_sfd,msg);
 	} else if ( strstr(msg,"RNFR") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		handle_rnfr(client_sfd,msg);
 	} else if ( strstr(msg,"RNTO") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		handle_rnto(client_sfd,msg);
 	} else if ( strstr(msg,"SITE") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_site(client_sfd,msg);
@@ -226,6 +228,14 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 		return -1;
 	}
 
+	return 0;
+}
+int handle_rnfr(int cmd_port,char *msg)
+{
+	return 0;
+}
+int handle_rnto(int cmd_port,char *msg)
+{
 	return 0;
 }
 int handle_site(int cmd_port,char *msg)

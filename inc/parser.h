@@ -21,6 +21,8 @@ int handle_noop(int);
 int handle_nlst(int);
 int handle_size(int,char*);
 int handle_site(int,char*);
+int handle_rnfr(int,char*);
+int handle_rnto(int,char*);
 
 enum SEND_TYPE {
 	ascii,
