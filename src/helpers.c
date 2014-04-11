@@ -8,6 +8,12 @@
 #include <sys/socket.h>
 #include "err_print.h"
 
+int starts_with(const char *str, const char *substr)
+{
+	if (strncmp(str,substr,strlen(substr)) == 0)
+		return 1;
+	return 0;
+}
 int getport(int a,int b)
 {
 	return (a*256 + b);
