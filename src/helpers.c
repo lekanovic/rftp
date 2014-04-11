@@ -7,7 +7,18 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "err_print.h"
+#include <sys/stat.h>
 
+int file_exist(char *filename)
+{
+	struct stat buf;
+
+	if (stat(filename, &buf))
+		return 1;
+	else
+		return 0;
+
+}
 int starts_with(const char *str, const char *substr)
 {
 	if (strncmp(str,substr,strlen(substr)) == 0)
