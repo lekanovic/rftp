@@ -509,11 +509,6 @@ int handle_retr(int cmd_port, char* msg)
 int handle_cwd(int cmd_port,char* msg)
 {
 	char *str;
-
-	if (!starts_with(msg,"CWD /home") ) {
-		ftp_send(cmd_port,NOT_AN_DIRECTORY,strlen(NOT_AN_DIRECTORY),0);
-	}
-
 	if ((str = ftp_calloc(strlen(msg),sizeof(char))) == NULL)
 		ERR("calloc\n");
 
