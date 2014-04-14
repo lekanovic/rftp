@@ -26,5 +26,9 @@
 #define SEND_OK			"200 Server okay\r\n"
 #define COMMAND_NOT_UNDERSTOOD	"500 command not understood\r\n"
 #define NOT_AN_DIRECTORY	"550 This is not an directory\r\n"
+#define FILE_NOT_FOUND		"550 File does not exist\r\n"
 #define CANNOT_OPEN_DATA_CON	"425 Cannot open data connection\r\n"
+#define REQUEST_FILE_ACTION	"350 Requested file action pending further information\r\n"
+#define FILE_ACTION_DONE	"250 Requested file action okay, completed\r\n"
+#define BAD_COMMAND_SEQUENCE	"503 Bad sequence of commands\r\n"
 #endif
