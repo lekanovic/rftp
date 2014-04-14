@@ -13,6 +13,18 @@
 
 #define NOT_FOUND	0
 
+int isFile(const char *path)
+{
+	struct stat s;
+
+	if( stat(path,&s) == 0 ) {
+		if( s.st_mode & S_IFREG )
+			return 1;
+		else
+			return 0;
+	}
+	return 0;
+}
 int get_user_id(const char *name)
 {
 	struct passwd *p;
