@@ -8,7 +8,21 @@
 #include <sys/socket.h>
 #include "err_print.h"
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <pwd.h>
 
+#define NOT_FOUND	0
+
+int get_user_id(const char *name)
+{
+	struct passwd *p;
+
+	if ((p = getpwnam(name)) == NULL) {
+		return NOT_FOUND;
+	}
+
+	return p->pw_uid;
+}
 int file_exist(char *filename)
 {
 	struct stat buf;
