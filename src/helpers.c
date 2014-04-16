@@ -10,9 +10,60 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <unistd.h>
+#include "helpers.h"
 
 #define NOT_FOUND	0
 
+int init_dir()
+{
+	char cwd[1024];
+
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+		fprintf(stdout, "Current working dir: %s\n", cwd);
+	else
+		perror("getcwd() error");
+
+	strcat(cwd,"/publish");
+
+	if (!dir_exist(cwd)) {
+		printf("Creating dir %s\n",cwd);
+		mkdir(cwd, S_IRWXG );
+		change_grp("FtpUsers",cwd);
+		chmod(cwd,S_IRWXG|S_IRWXO|S_IRWXU);
+	}
+
+	return 1;
+}
+int change_grp(const char *group,const char *path)
+{
+	char command[1024];
+
+	sprintf(command,"chgrp %s %s\n",group,path);
+	system(command);
+
+	return 1;
+}
+int change_working_dir()
+{
+	char cwd[1024];
+
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+		fprintf(stdout, "Current working dir: %s\n", cwd);
+	else {
+		perror("getcwd() error");
+		return 0;
+	}
+
+	strcat(cwd,"/publish");
+
+	if (chdir(cwd) < 0) {
+		ERR("chdir\n");
+		return 0;
+	}
+
+	return 1;
+}
 int dir_exist(const char *path)
 {
 	struct stat st;
