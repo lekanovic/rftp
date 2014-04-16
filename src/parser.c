@@ -60,8 +60,8 @@ static int verify_login(int cmd_port, char* user_name)
 				int userId=0;
 				char *dir = get_home_dir(user_name);
 				DEBUG_PRINT(cmd_port,"HOME: %s\n",dir);
-				if (chdir(dir) < 0)
-					ERR("chdir\n");
+
+				change_working_dir();
 
 				userId = get_user_id(user_name);
 

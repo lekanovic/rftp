@@ -94,6 +94,7 @@ again:
 	get_ip_addr(&server_addr.sin_addr);
 	server_addr.sin_port = htons(port);
 
+	init_dir();
 
 	printf("Server: %s %s %s:%d\n",
 		he->h_name,
