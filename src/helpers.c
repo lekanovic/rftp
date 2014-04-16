@@ -18,7 +18,7 @@ int dir_exist(const char *path)
 	struct stat st;
 	if(stat(path,&st) == 0)
 		return 1;
-	return 0
+	return 0;
 }
 int get_user_id(const char *name)
 {
