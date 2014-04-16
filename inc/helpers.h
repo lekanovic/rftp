@@ -15,4 +15,5 @@ int get_user_id(const char *);
 int init_dir();
 int change_working_dir();
 int change_grp(const char*,const char*);
+int dele_dir(char*);
 #endif
