@@ -10,5 +10,6 @@ int get_recvbuf_size(int);
 int getport(int,int);
 int starts_with(const char *, const char *);
 int file_exist(char *);
+int dir_exist(const char *);
 int get_user_id(const char *);
 #endif
