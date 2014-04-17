@@ -17,6 +17,7 @@ do
 ./speed_test.py $ip $port
 ./put-get-test.py $ip $port
 ./download_test.py $ip $port "1_dir"
+./rename_folder_test.py $ip $port
 done
 
 echo "All md5sum should be the same.."
