@@ -16,7 +16,7 @@
 #include <err.h>
 #include <unistd.h>
 #include "helpers.h"
-
+#include "config_parser.h"
 
 #define NOT_FOUND	0
 
@@ -111,6 +111,11 @@ int dele_dir(char* dir)
 		printf("Cannot remove file %s %s\n",dir,strerror(errno));
 
 	return 0;
+}
+void initialize_system()
+{
+	init_dir();
+	create_ini_file();
 }
 int init_dir()
 {
@@ -209,15 +214,10 @@ int get_user_id(const char *name)
 
 	return p->pw_uid;
 }
-int file_exist(char *filename)
+int file_exist (char *filename)
 {
-	struct stat buf;
-
-	if (stat(filename, &buf))
-		return 1;
-	else
-		return 0;
-
+	struct stat   buffer;
+	return (stat (filename, &buffer) == 0);
 }
 int starts_with(const char *str, const char *substr)
 {

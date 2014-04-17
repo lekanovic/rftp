@@ -4,8 +4,10 @@
 #include <unistd.h>
 
 #include "iniparser.h"
+#include "helpers.h"
 
-void create_example_ini_file(void);
+#define CONFIG_FILE "config_rftp.ini"
+
 int  parse_ini_file(char * ini_name);
 /*
 int main(int argc, char * argv[])
@@ -21,32 +23,39 @@ int main(int argc, char * argv[])
     return status ;
 }
 */
-void create_example_ini_file(void)
+void create_ini_file(void)
 {
-    FILE    *   ini ;
+	char cwd[1024];
+	FILE    *   ini ;
+	puts("create_ini_file");
+	if (file_exist(CONFIG_FILE)){
+		printf("file exist %s\n",CONFIG_FILE);
+		return;
+	}
 
-    ini = fopen("example.ini", "w");
-    fprintf(ini,
-    "#\n"
-    "# This is an example of ini file\n"
-    "#\n"
-    "\n"
-    "[Pizza]\n"
-    "\n"
-    "Ham       = yes ;\n"
-    "Mushrooms = TRUE ;\n"
-    "Capres    = 0 ;\n"
-    "Cheese    = Non ;\n"
-    "\n"
-    "\n"
-    "[Wine]\n"
-    "\n"
-    "Grape     = Cabernet Sauvignon ;\n"
-    "Year      = 1989 ;\n"
-    "Country   = Spain ;\n"
-    "Alcohol   = 12.5  ;\n"
-    "\n");
-    fclose(ini);
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+		fprintf(stdout, "Current working dir: %s\n", cwd);
+	else {
+		perror("getcwd() error");
+		return ;
+	}
+
+	ini = fopen(CONFIG_FILE, "w");
+	fprintf(ini,
+		"#\n"
+		"# This is an config file for rftp server\n"
+		"#\n"
+		"\n"
+		"[Directory]\n"
+		"\n"
+		"ServerHomeDir       = %s ;\n"
+		"\n"
+		"\n"
+		"[Settings]\n"
+		"\n"
+		"UseNagles = yes ;\n"
+	"\n",cwd);
+	fclose(ini);
 }
 
 
