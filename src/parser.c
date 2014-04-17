@@ -370,17 +370,17 @@ int handle_dele(int cmd_port,char *msg)
 // 250 Requested file action okay, completed.
 int handle_rmd(int cmd_port,char* msg)
 {
-	int ret;
 	char* send_msg;
 	char* dir = msg + 4;
 
 	rm_crlf(dir);
 
-	if ((ret=rmdir(dir)) < 0) {
-		ERR("rmdir\n");
+	if (!dir_exist(dir)) {
+		ERR("dir does not exist\n");
 		send_msg = ftp_calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
 		sprintf(send_msg,"%s",FILE_UNAVAILABLE);
 	} else {
+		dele_dir(dir);
 		send_msg = ftp_calloc(strlen(FILE_ACTION_OK)+1,
 				sizeof(char));
 		sprintf(send_msg,"%s",FILE_ACTION_OK);
