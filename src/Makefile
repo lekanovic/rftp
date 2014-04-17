@@ -1,7 +1,7 @@
 CC=gcc
 INC=-I../inc -I/usr/lib/gcc/x86_64-linux-gnu/4.6.1/
-CFLAGS=-pthread -lcrypt -Werror -Wall -Wno-unused-but-set-variable
-SRC=main.c setup.c parser.c file_op.c mem_op.c connect.c login.c time_op.c helpers.c
+CFLAGS=-pthread -lcrypt -L../lib -liniparser -Werror -Wall -Wno-unused-but-set-variable
+SRC=main.c setup.c parser.c file_op.c mem_op.c connect.c login.c time_op.c helpers.c config_parser.c
 OBJS=$(SRC:.c=.o)
 
 .c.o:
