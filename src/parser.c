@@ -275,12 +275,14 @@ int handle_rnto(int cmd_port,char *msg)
 	//RNTO /home/tester/newFileName
 	char *new_file_name = msg + 5;
 
+	rm_crlf(old_file_name);
+
 	rename_file_request = 0;
 
 	if(rename(old_file_name, new_file_name) == 0) {
 		printf("%s has been rename %s.\n", old_file_name, new_file_name);
 	} else {
-		fprintf(stderr, "Error renaming %s.\n", old_file_name);
+		fprintf(stderr, "Error renaming %s to %s\n", old_file_name,new_file_name);
 		printf("an error: %s\n", strerror(errno));
 		ftp_send(cmd_port,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
 		return -1;
