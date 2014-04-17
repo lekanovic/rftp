@@ -16,4 +16,5 @@ int init_dir();
 int change_working_dir();
 int change_grp(const char*,const char*);
 int dele_dir(char*);
+int setup_user_env(char *);
 #endif

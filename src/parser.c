@@ -57,17 +57,9 @@ static int verify_login(int cmd_port, char* user_name)
 			if (handle_pass(cmd_port,msg,user_name) == WRONG_PASSWD)
 				return 0;
 			else {
-				int userId=0;
-				char *dir = get_home_dir(user_name);
-				DEBUG_PRINT(cmd_port,"HOME: %s\n",dir);
-
-				change_working_dir();
-
-				userId = get_user_id(user_name);
+				int userId = setup_user_env(user_name);
 
 				DEBUG_PRINT(cmd_port,"SetUid=%d for %s\n",userId,user_name);
-				if (setuid(userId) < 0)
-					printf("Failed to setuid for %s\n",user_name);
 
 				return 1;
 			}

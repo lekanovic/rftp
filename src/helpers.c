@@ -132,6 +132,37 @@ int init_dir()
 
 	return 1;
 }
+int setup_user_env(char *user)
+{
+	int userId=0;
+	char cwd[1024];
+
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+		fprintf(stdout, "Current working dir: %s\n", cwd);
+	else {
+		perror("getcwd() error");
+		return -1;
+	}
+
+	strcat(cwd,"/publish");
+
+	if (chdir(cwd)  != 0)
+		perror("chdir failed");
+
+	if (chroot(cwd) != 0) {
+		perror("chroot failed");
+		return -1;
+	}
+
+	userId = get_user_id(user);
+
+	if (setuid(userId) < 0) {
+		printf("Failed to setuid for %s\n",user);
+		return -1;
+	}
+
+	return userId;
+}
 int change_grp(const char *group,const char *path)
 {
 	char command[1024];
