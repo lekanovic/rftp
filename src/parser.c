@@ -307,12 +307,13 @@ int handle_size(int cmd_port,char *msg)
 
 	rm_crlf(file);
 
-	if ((fd=stat(file,&st)) < 0)
+	if ((fd=stat(file,&st)) < 0) {
 		ERR("stat\n");
-
-	sprintf(buf,"213 %d\r\n",(int)st.st_size);
-
-	ftp_send(cmd_port,buf,strlen(buf),0);
+		ftp_send(cmd_port,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
+	} else {
+		sprintf(buf,"213 %d\r\n",(int)st.st_size);
+		ftp_send(cmd_port,buf,strlen(buf),0);
+	}
 
 	return 0;
 }
