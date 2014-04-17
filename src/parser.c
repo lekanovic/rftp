@@ -276,6 +276,7 @@ int handle_rnto(int cmd_port,char *msg)
 	char *new_file_name = msg + 5;
 
 	rm_crlf(old_file_name);
+	rm_crlf(new_file_name);
 
 	rename_file_request = 0;
 
