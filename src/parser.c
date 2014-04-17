@@ -347,11 +347,14 @@ int handle_feat(int cmd_port)
 // DELE <SP> <pathname> <CRLF>
 int handle_dele(int cmd_port,char *msg)
 {
+	int ret;
 	char *send_msg,*file = msg + 5;
 
 	rm_crlf(file);
 
-	dele_dir(file);
+	if ((ret=unlink(file)) < 0) {
+		ERR("unlink");
+	}
 
 	send_msg = ftp_calloc(25 + strlen(file), sizeof(char));
 
