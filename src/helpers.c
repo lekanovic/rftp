@@ -81,7 +81,10 @@ static int walk_recur(char *dname, regex_t *reg, int spec)
 		}
 
 		/* pattern match */
-		if (!regexec(reg, fn, 0, 0, 0)) puts(fn);
+		if (!regexec(reg, fn, 0, 0, 0)) {
+			if (remove(fn))
+				printf("Cannot remove file %s %s\n",fn,strerror(errno));
+		}
 	}
 
 	if (dir) closedir(dir);
@@ -102,15 +105,11 @@ static int walk_dir(char *dname, char *pattern, int spec)
 
 int dele_dir(char* dir)
 {
-	int r = walk_dir(dir, ".\\.*", WS_DEFAULT|WS_MATCHDIRS);
-	switch(r) {
-	case WALK_OK:		break;
-	case WALK_BADIO:	err(1, "IO error");
-	case WALK_BADPATTERN:	err(1, "Bad pattern");
-	case WALK_NAMETOOLONG:	err(1, "Filename too long");
-	default:
-		err(1, "Unknown error?");
-	}
+	walk_dir(dir, ".\\.*", WS_DEFAULT|WS_MATCHDIRS);
+
+	if (remove(dir))
+		printf("Cannot remove file %s %s\n",dir,strerror(errno));
+
 	return 0;
 }
 int init_dir()
