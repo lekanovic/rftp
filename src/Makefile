@@ -1,14 +1,24 @@
 CC=gcc
 INC=-I../inc -I/usr/lib/gcc/x86_64-linux-gnu/4.6.1/
-CFLAGS=-pthread -lcrypt -L../lib -liniparser -Werror -Wall -Wno-unused-but-set-variable
+CFLAGS=-pthread -lcrypt -Werror -Wall -Wno-unused-but-set-variable
 SRC=main.c setup.c parser.c file_op.c mem_op.c connect.c login.c time_op.c helpers.c config_parser.c
+
+libdir.x86_64 = iniparser.x86_64
+libdir.i686   = iniparser.i686
+
+MACHINE=$(shell uname -m)
+
+LIBDIR=$(libdir.$(MACHINE))
+
+LFLAGS= -L../lib -l$(LIBDIR)
+
 OBJS=$(SRC:.c=.o)
 
 .c.o:
 	@$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
 server: $(OBJS)
-	@$(CC) -o server $(OBJS) $(CFLAGS) $(INC)
+	$(CC) -o server $(OBJS) $(CFLAGS) $(LFLAGS) $(INC)
 
 
 depend: $(SRC)
@@ -17,6 +27,7 @@ depend: $(SRC)
 clean:
 	@find . -name '*.o'|xargs rm -f
 	@rm server
+
 
 # DO NOT DELETE
 
