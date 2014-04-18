@@ -8,6 +8,7 @@
 
 int debug_mode = 0;
 int disable_nagle_algorithm = 0;
+char server_dir[1024];
 
 void handler(int sig)
 {
