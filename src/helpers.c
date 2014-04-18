@@ -34,6 +34,8 @@ enum {
 #define WS_DOTFILES	(1 << 2)	/* per unix convention, .file is hidden */
 #define WS_MATCHDIRS	(1 << 3)	/* if pattern is used on dir names too */
 
+extern char server_dir[1024];
+
 static int walk_recur(char *dname, regex_t *reg, int spec)
 {
 	struct dirent *dent;
@@ -114,25 +116,18 @@ int dele_dir(char* dir)
 }
 void initialize_system()
 {
-	init_dir();
 	create_ini_file();
+	init_dir();
 }
 int init_dir()
 {
-	char cwd[1024];
+	strcat(server_dir,"/publish");
 
-	if (getcwd(cwd, sizeof(cwd)) != NULL)
-		fprintf(stdout, "Current working dir: %s\n", cwd);
-	else
-		perror("getcwd() error");
-
-	strcat(cwd,"/publish");
-
-	if (!dir_exist(cwd)) {
-		printf("Creating dir %s\n",cwd);
-		mkdir(cwd, S_IRWXG );
-		change_grp("FtpUsers",cwd);
-		chmod(cwd,S_IRWXG|S_IRWXO|S_IRWXU);
+	if (!dir_exist(server_dir)) {
+		printf("Creating dir %s\n",server_dir);
+		mkdir(server_dir, S_IRWXG );
+		change_grp("FtpUsers",server_dir);
+		chmod(server_dir,S_IRWXG|S_IRWXO|S_IRWXU);
 	}
 
 	return 1;
@@ -140,21 +135,11 @@ int init_dir()
 int setup_user_env(char *user)
 {
 	int userId=0;
-	char cwd[1024];
 
-	if (getcwd(cwd, sizeof(cwd)) != NULL)
-		fprintf(stdout, "Current working dir: %s\n", cwd);
-	else {
-		perror("getcwd() error");
-		return -1;
-	}
-
-	strcat(cwd,"/publish");
-
-	if (chdir(cwd)  != 0)
+	if (chdir(server_dir)  != 0)
 		perror("chdir failed");
 
-	if (chroot(cwd) != 0) {
+	if (chroot(server_dir) != 0) {
 		perror("chroot failed");
 		return -1;
 	}
