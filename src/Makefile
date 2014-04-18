@@ -18,7 +18,7 @@ OBJS=$(SRC:.c=.o)
 	@$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
 server: $(OBJS)
-	$(CC) -o server $(OBJS) $(CFLAGS) $(LFLAGS) $(INC)
+	@$(CC) -o server $(OBJS) $(CFLAGS) $(LFLAGS) $(INC)
 
 
 depend: $(SRC)
@@ -27,7 +27,6 @@ depend: $(SRC)
 clean:
 	@find . -name '*.o'|xargs rm -f
 	@rm server
-
 
 # DO NOT DELETE
 
