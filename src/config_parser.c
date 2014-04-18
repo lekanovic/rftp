@@ -46,7 +46,10 @@ void create_ini_file(void)
 		"\n"
 		"DisableNagle = yes ;\n"
 	"\n",cwd);
+
 	fclose(ini);
+
+	parse_ini_file(CONFIG_FILE);
 }
 
 
