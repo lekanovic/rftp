@@ -7,22 +7,12 @@
 #include "helpers.h"
 
 #define CONFIG_FILE "config_rftp.ini"
+extern int disable_nagle_algorithm;
+extern char server_dir[1024];
 
-int  parse_ini_file(char * ini_name);
-/*
-int main(int argc, char * argv[])
-{
-    int     status ;
+//This was taken from: http://ndevilla.free.fr/iniparser/
+int  parse_ini_file(char *);
 
-    if (argc<2) {
-        create_example_ini_file();
-        status = parse_ini_file("example.ini");
-    } else {
-        status = parse_ini_file(argv[1]);
-    }
-    return status ;
-}
-*/
 void create_ini_file(void)
 {
 	char cwd[1024];
@@ -30,6 +20,7 @@ void create_ini_file(void)
 	puts("create_ini_file");
 	if (file_exist(CONFIG_FILE)){
 		printf("file exist %s\n",CONFIG_FILE);
+		parse_ini_file(CONFIG_FILE);
 		return;
 	}
 
@@ -48,12 +39,12 @@ void create_ini_file(void)
 		"\n"
 		"[Directory]\n"
 		"\n"
-		"ServerHomeDir       = %s ;\n"
+		"ServerHomeDir = %s ;\n"
 		"\n"
 		"\n"
 		"[Settings]\n"
 		"\n"
-		"UseNagles = yes ;\n"
+		"DisableNagle = yes ;\n"
 	"\n",cwd);
 	fclose(ini);
 }
@@ -61,49 +52,28 @@ void create_ini_file(void)
 
 int parse_ini_file(char * ini_name)
 {
-    dictionary  *   ini ;
+	dictionary *ini ;
 
-    /* Some temporary variables to hold query results */
-    int             b ;
-    int             i ;
-    double          d ;
-    char        *   s ;
+	/* Some temporary variables to hold query results */
+	char *home_dir;
 
-    ini = iniparser_load(ini_name);
-    if (ini==NULL) {
-        fprintf(stderr, "cannot parse file: %s\n", ini_name);
-        return -1 ;
-    }
-    iniparser_dump(ini, stderr);
+	ini = iniparser_load(ini_name);
 
-    /* Get pizza attributes */
-    printf("Pizza:\n");
+	if (ini==NULL) {
+		fprintf(stderr, "cannot parse file: %s\n", ini_name);
+		return -1 ;
+	}
 
-    b = iniparser_getboolean(ini, "pizza:ham", -1);
-    printf("Ham:       [%d]\n", b);
-    b = iniparser_getboolean(ini, "pizza:mushrooms", -1);
-    printf("Mushrooms: [%d]\n", b);
-    b = iniparser_getboolean(ini, "pizza:capres", -1);
-    printf("Capres:    [%d]\n", b);
-    b = iniparser_getboolean(ini, "pizza:cheese", -1);
-    printf("Cheese:    [%d]\n", b);
+	iniparser_dump(ini, stderr);
 
-    /* Get wine attributes */
-    printf("Wine:\n");
-    s = iniparser_getstring(ini, "wine:grape", NULL);
-    printf("Grape:     [%s]\n", s ? s : "UNDEF");
-    
-    i = iniparser_getint(ini, "wine:year", -1);
-    printf("Year:      [%d]\n", i);
+	home_dir = iniparser_getstring(ini, "Directory:ServerHomeDir", NULL);
+	disable_nagle_algorithm = iniparser_getboolean(ini, "Settings:UseNagles", -1);
 
-    s = iniparser_getstring(ini, "wine:country", NULL);
-    printf("Country:   [%s]\n", s ? s : "UNDEF");
-    
-    d = iniparser_getdouble(ini, "wine:alcohol", -1.0);
-    printf("Alcohol:   [%g]\n", d);
+	memset(server_dir,0,sizeof(server_dir));
+	strcpy(server_dir,home_dir);
 
-    iniparser_freedict(ini);
-    return 0 ;
+	iniparser_freedict(ini);
+	return 0 ;
 }
 
 
