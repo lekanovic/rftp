@@ -17,7 +17,7 @@ void create_ini_file(void)
 {
 	char cwd[1024];
 	FILE    *   ini ;
-	puts("create_ini_file");
+
 	if (file_exist(CONFIG_FILE)){
 		printf("file exist %s\n",CONFIG_FILE);
 		parse_ini_file(CONFIG_FILE);
