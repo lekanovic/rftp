@@ -18,7 +18,7 @@
 #include "helpers.h"
 #include "config_parser.h"
 
-#define NOT_FOUND	0
+#define NOT_FOUND	-1
 
 enum {
 	WALK_OK = 0,
