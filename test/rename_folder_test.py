@@ -41,7 +41,14 @@ def clean_folders():
 	if ftp.sendcmd('RMD NewName') != "250 Requested file action okay, completed":
 		print_test_failed()
 	else:
-		print_test_passed()	
+		print_test_passed()
+
+	try:
+		ftp.sendcmd('CWD NewName') != "550 This is not an directory"
+	except ftplib.error_perm:
+		print_test_passed()
+		return
+	print_test_failed()
 
 def main():
 	connect_to_ftp()
