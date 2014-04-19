@@ -248,6 +248,8 @@ int handle_rnfr(int cmd_port,char *msg)
 	char *file_path = msg + 5;
 	rename_file_request = 1;
 
+	rm_crlf(file_path);
+
 	memset(old_file_name,0,FILE_BUFFER_NAME);
 	strcpy(old_file_name,file_path);
 
