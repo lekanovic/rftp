@@ -51,6 +51,7 @@ def clean_folders():
 	print_test_failed()
 
 def main():
+	print "*** START RENAME FOLDER TEST ***"
 	connect_to_ftp()
 	mkd_cmd_test()
 	rename_cmd_test()

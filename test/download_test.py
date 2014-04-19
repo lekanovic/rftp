@@ -63,7 +63,7 @@ def dele_cmd_test():
 		print_test_passed()
 
 def main(p):
-	print "*** Download TEST started ***"
+	print "*** START DOWNLOAD TEST ***"
 	connect_to_ftp()
 
 	create_big_file()
@@ -71,7 +71,7 @@ def main(p):
 	retr_cmd_test(p)
 	dele_cmd_test()
 	close_connection()
-	print "*** Download TEST done ***"
+
 
 if __name__ == "__main__":
 	if len(sys.argv) == 4:

@@ -80,17 +80,16 @@ def check_hash():
 		print_test_passed()
 
 def main():
-	create_big_file()
+	print "*** START CONNECT TEST ***"
 
-	for i in range(0,5):
-		print "*** START NEW TEST ROUND ***"
-		connect_to_ftp()
-		stor_cmd_test()
-		retr_cmd_test()
-		check_hash()
-		dele_cmd_test()
-		close_connection()
-		time.sleep(2)
+	create_big_file()
+	connect_to_ftp()
+	stor_cmd_test()
+	retr_cmd_test()
+	check_hash()
+	dele_cmd_test()
+	close_connection()
+
 
 if __name__ == "__main__":
 	if len(sys.argv) == 3:

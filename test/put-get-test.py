@@ -104,8 +104,9 @@ def dele_cmd_test():
 		print_test_passed() 
 	
 def main():
-	connect_to_ftp()
+	print "*** START PUT-GET TEST ***"
 
+	connect_to_ftp()
 	list_cmd_test()
 	pwd_cmd_test()
 	cwd_cmd_test()
