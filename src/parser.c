@@ -49,6 +49,12 @@ static int verify_login(int cmd_port, char* user_name)
 			return 0;
 		}
 		if (strstr(msg,"USER") != NULL) {
+			if ( strstr(msg,"USER anonymous") != NULL) {
+				setup_user_env("Anonymous");
+				ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
+				return 1;
+			}
+
 			if (handle_user(cmd_port,msg,user_name) == NO_USER) {
 				DEBUG_PRINT(cmd_port,"%s is trying to login\n",user_name);
 				return 0;
@@ -66,6 +72,7 @@ static int verify_login(int cmd_port, char* user_name)
 		}  else if ( strstr(msg,"FEAT") != NULL) {
 			handle_feat(cmd_port);
 		}
+
 		memset(msg,0,BUF_SIZE);
 	}
 }
