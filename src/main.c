@@ -9,6 +9,7 @@
 int debug_mode = 0;
 int disable_nagle_algorithm = 0;
 char server_dir[1024];
+int allow_anonymous_login=0;
 
 void handler(int sig)
 {

@@ -9,6 +9,7 @@
 #define CONFIG_FILE "config_rftp.ini"
 extern int disable_nagle_algorithm;
 extern char server_dir[1024];
+extern int allow_anonymous_login;
 
 //This was taken from: http://ndevilla.free.fr/iniparser/
 int  parse_ini_file(char *);
@@ -39,13 +40,15 @@ void create_ini_file(void)
 		"\n"
 		"[Directory]\n"
 		"\n"
-		"ServerHomeDir = %s ;\n"
+		"ServerHomeDir = %s ;"
 		"\n"
 		"\n"
 		"[Settings]\n"
 		"\n"
 		"DisableNagle = yes ;\n"
-	"\n",cwd);
+		"AllowAnonymousLogin = yes ;\n"
+		"\n"
+	,cwd);
 
 	fclose(ini);
 
@@ -71,6 +74,7 @@ int parse_ini_file(char * ini_name)
 
 	home_dir = iniparser_getstring(ini, "Directory:ServerHomeDir", NULL);
 	disable_nagle_algorithm = iniparser_getboolean(ini, "Settings:UseNagles", -1);
+	allow_anonymous_login = iniparser_getboolean(ini, "Settings:AllowAnonymousLogin", -1);
 
 	memset(server_dir,0,sizeof(server_dir));
 	strcpy(server_dir,home_dir);

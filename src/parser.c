@@ -31,6 +31,7 @@ char old_file_name[FILE_BUFFER_NAME];
 int rename_file_request=0;
 
 //http://mina.apache.org/ftpserver/ftp-commands.html
+extern int allow_anonymous_login;
 
 static int parse_msg(int,char*,char*);
 static int data_fd;
@@ -49,10 +50,12 @@ static int verify_login(int cmd_port, char* user_name)
 			return 0;
 		}
 		if (strstr(msg,"USER") != NULL) {
-			if ( strstr(msg,"USER anonymous") != NULL) {
-				setup_user_env("Anonymous");
-				ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
-				return 1;
+			if (allow_anonymous_login) {
+				if ( strstr(msg,"USER anonymous") != NULL) {
+					setup_user_env();
+					ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
+					return 1;
+				}
 			}
 
 			if (handle_user(cmd_port,msg,user_name) == NO_USER) {
@@ -63,7 +66,7 @@ static int verify_login(int cmd_port, char* user_name)
 			if (handle_pass(cmd_port,msg,user_name) == WRONG_PASSWD)
 				return 0;
 			else {
-				int userId = setup_user_env(user_name);
+				int userId = setup_user_env();
 
 				DEBUG_PRINT(cmd_port,"SetUid=%d for %s\n",userId,user_name);
 
