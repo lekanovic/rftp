@@ -132,10 +132,8 @@ int init_dir()
 
 	return 1;
 }
-int setup_user_env(char *user)
+int setup_user_env()
 {
-	int userId=0;
-
 	if (chdir(server_dir)  != 0)
 		perror("chdir failed");
 
@@ -144,14 +142,7 @@ int setup_user_env(char *user)
 		return -1;
 	}
 
-	userId = get_user_id(user);
-
-	if (setuid(userId) < 0) {
-		printf("Failed to setuid for %s\n",user);
-		return -1;
-	}
-
-	return userId;
+	return 1;
 }
 int change_grp(const char *group,const char *path)
 {
