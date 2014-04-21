@@ -158,6 +158,7 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MDTM") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
+		handle_mdtm(client_sfd,msg);
 	} else if ( strstr(msg,"MIC") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"MKD") != NULL) {
@@ -251,7 +252,10 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 
 	return 0;
 }
-
+int handle_mdtm(int cmd_port,char *msg)
+{
+	return 0;
+}
 int handle_rnfr(int cmd_port,char *msg)
 {
 	//RNFR /home/tester/Untitled Folder

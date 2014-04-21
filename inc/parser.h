@@ -23,6 +23,7 @@ int handle_size(int,char*);
 int handle_site(int,char*);
 int handle_rnfr(int,char*);
 int handle_rnto(int,char*);
+int handle_mdtm(int,char*);
 
 enum SEND_TYPE {
 	ascii,
