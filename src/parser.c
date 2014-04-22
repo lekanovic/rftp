@@ -252,8 +252,52 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 
 	return 0;
 }
+//https://tools.ietf.org/html/rfc3659#page-10
 int handle_mdtm(int cmd_port,char *msg)
 {
+	// MDTM remote-filename
+	char buf[256];
+	struct tm *foo;
+	struct stat attrib;
+	char *file = msg + 5;
+
+	rm_crlf(file);
+
+	if (!file_exist(file)) {
+		ftp_send(cmd_port,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
+		return 0;
+	}
+
+	if (dir_exist(file)) {
+		char message[128];
+		sprintf(message,"550 %s is not retrievable\r\n",file);
+		ftp_send(cmd_port,message,strlen(message),0);
+		return 0;
+	}
+
+	stat(file, &attrib);
+	foo = gmtime(&(attrib.st_mtime));
+
+	if (debug_mode) {
+		printf("Last change of %s\n",file);
+		printf("Year: %d\n", foo->tm_year);
+		printf("Month: %d\n", foo->tm_mon);
+		printf("Day: %d\n", foo->tm_mday);
+		printf("Hour: %d\n", foo->tm_hour);
+		printf("Minute: %d\n", foo->tm_min);
+		printf("Second: %d\n", foo->tm_sec);
+	}
+
+	sprintf(buf,"213 %d%d%d%d%d%d\n",
+		foo->tm_year,
+		foo->tm_mon,
+		foo->tm_mday,
+		foo->tm_hour,
+		foo->tm_min,
+		foo->tm_sec);
+
+	ftp_send(cmd_port,buf,strlen(buf),0);
+
 	return 0;
 }
 int handle_rnfr(int cmd_port,char *msg)
