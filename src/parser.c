@@ -288,7 +288,7 @@ int handle_mdtm(int cmd_port,char *msg)
 		printf("Second: %d\n", foo->tm_sec);
 	}
 
-	sprintf(buf,"213 %d%d%d%d%d%d\n",
+	sprintf(buf,"213 %d%d%d%d%d%d\r\n",
 		foo->tm_year,
 		foo->tm_mon,
 		foo->tm_mday,
