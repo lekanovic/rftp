@@ -1,0 +1,22 @@
+# Object files #
+############
+*.o
+*.m4
+
+# Autobuild files #
+############
+Makefile
+Makefile.in
+config_rftp.ini
+configure
+config.h
+config.h.in
+config.status
+compile
+stamp-h1
+autom4te.cache
+config.log
+depcomp
+install-sh
+missing
+src/.deps/
