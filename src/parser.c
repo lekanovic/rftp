@@ -27,8 +27,6 @@
 #define NO_USER			(-2)
 #define WRONG_PASSWD		(-3)
 #define FILE_BUFFER_NAME	1024
-char old_file_name[FILE_BUFFER_NAME];
-int rename_file_request=0;
 
 //http://mina.apache.org/ftpserver/ftp-commands.html
 extern int allow_anonymous_login;
@@ -111,13 +109,6 @@ int handle_msg(int client_sfd)
 
 static int parse_msg(int client_sfd,char* msg,char* user_name)
 {
-	if (rename_file_request && strstr(msg,"RNTO") == NULL){
-		printf("Error RNTO command must be followed by an RNFR command\n");
-		ftp_send(client_sfd,BAD_COMMAND_SEQUENCE,strlen(BAD_COMMAND_SEQUENCE),0);
-		rename_file_request = 0;
-		return 0;
-	}
-
 	if ( strstr(msg,"ABOR") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 	} else if ( strstr(msg,"ACCT") != NULL) {
@@ -215,9 +206,6 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 	} else if ( strstr(msg,"RNFR") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_rnfr(client_sfd,msg);
-	} else if ( strstr(msg,"RNTO") != NULL) {
-		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
-		handle_rnto(client_sfd,msg);
 	} else if ( strstr(msg,"SITE") != NULL) {
 		DEBUG_PRINT(client_sfd,"%s %d %s\n",__func__,__LINE__,msg);
 		handle_site(client_sfd,msg);
@@ -304,36 +292,44 @@ int handle_rnfr(int cmd_port,char *msg)
 {
 	//RNFR /home/tester/Untitled Folder
 	char *file_path = msg + 5;
-	rename_file_request = 1;
+	char old_file_name[FILE_BUFFER_NAME];
+	char recv_msg[BUF_SIZE];
+	int bytes;
+
+	memset(recv_msg,0,BUF_SIZE);
+	memset(old_file_name,0,FILE_BUFFER_NAME);
 
 	rm_crlf(file_path);
 
-	memset(old_file_name,0,FILE_BUFFER_NAME);
 	strcpy(old_file_name,file_path);
 
 	if (!file_exist(file_path)){
-		//File does not exist
-		printf("File does not exist %s\n",file_path);
+		DEBUG_PRINT(cmd_port,"File does not exist %s\n",file_path);
 		ftp_send(cmd_port,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
 		return 0;
 	}
 
 	ftp_send(cmd_port,REQUEST_FILE_ACTION,strlen(REQUEST_FILE_ACTION),0);
 
-	return 0;
-}
-int handle_rnto(int cmd_port,char *msg)
-{
+	if ((bytes = ftp_recv(cmd_port,recv_msg,BUF_SIZE,0)) == 0) {
+		ERR("Client closed connection\n");
+		return 0;
+	}
+	// RNTO must be precedded with an RNFR
+	if (strstr(recv_msg,"RNTO") == NULL){
+		ERR("Error RNTO command must be followed by an RNFR command\n");
+		ftp_send(cmd_port,BAD_COMMAND_SEQUENCE,strlen(BAD_COMMAND_SEQUENCE),0);
+		return 0;
+	}
+
 	//RNTO /home/tester/newFileName
-	char *new_file_name = msg + 5;
+	char *new_file_name = recv_msg + 5;
 
 	rm_crlf(old_file_name);
 	rm_crlf(new_file_name);
 
-	rename_file_request = 0;
-
 	if(rename(old_file_name, new_file_name) == 0) {
-		printf("%s has been rename %s.\n", old_file_name, new_file_name);
+		DEBUG_PRINT(cmd_port,"[%s] has been renamed to [%s].\n", old_file_name, new_file_name);
 	} else {
 		fprintf(stderr, "Error renaming %s to %s\n", old_file_name,new_file_name);
 		printf("an error: %s\n", strerror(errno));
@@ -343,6 +339,7 @@ int handle_rnto(int cmd_port,char *msg)
 
 	ftp_send(cmd_port,FILE_ACTION_DONE,strlen(FILE_ACTION_DONE),0);
 	memset(old_file_name,0,FILE_BUFFER_NAME);
+
 	return 0;
 }
 int handle_site(int cmd_port,char *msg)
@@ -686,7 +683,9 @@ int handle_pwd(int cmd_port)
 
 	strcpy(msg, "257 \"");
 
-	getcwd(msg+strlen(msg),BUF_SIZE);
+	if (getcwd(msg+strlen(msg),BUF_SIZE) == NULL) {
+		ERR("getcwd\n");
+	}
 
 	strcat(msg,"\" is the current directory.\r\n");
 
