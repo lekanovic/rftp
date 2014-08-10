@@ -7,9 +7,6 @@
 #include "helpers.h"
 
 #define CONFIG_FILE "config_rftp.ini"
-extern int disable_nagle_algorithm;
-extern char server_dir[1024];
-extern int allow_anonymous_login;
 
 //This was taken from: http://ndevilla.free.fr/iniparser/
 int  parse_ini_file(char *,struct configs* cfg);
@@ -79,8 +76,10 @@ int parse_ini_file(char * ini_name,struct configs* cfg)
 	cfg->allow_anonymous_login = iniparser_getboolean(ini,
 					"Settings:AllowAnonymousLogin", -1);
 
-	memset(cfg->server_dir,0,sizeof(server_dir));
+	memset(cfg->server_dir,0,DIR_LENGTH);
 	strcpy(cfg->server_dir,home_dir);
+
+	strncat(cfg->server_dir,"/publish",DIR_LENGTH);
 
 	iniparser_freedict(ini);
 	return 0 ;

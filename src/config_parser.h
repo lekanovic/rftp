@@ -6,5 +6,6 @@ struct configs
 	char* server_dir;
 	int allow_anonymous_login;
 };
+#define DIR_LENGTH	(1024)
 void create_ini_file(struct configs* cfg);
 #endif

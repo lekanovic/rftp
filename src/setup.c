@@ -71,7 +71,7 @@ int start_server()
 	struct sockaddr_in server_addr;
 	struct hostent *he;
 	struct configs cfg;
-	cfg.server_dir = ftp_alloc(1024);
+	cfg.server_dir = ftp_alloc(DIR_LENGTH);
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
 		ERR("socket\n");
