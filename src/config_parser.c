@@ -12,16 +12,16 @@ extern char server_dir[1024];
 extern int allow_anonymous_login;
 
 //This was taken from: http://ndevilla.free.fr/iniparser/
-int  parse_ini_file(char *);
+int  parse_ini_file(char *,struct configs* cfg);
 
-void create_ini_file(void)
+void create_ini_file(struct configs* cfg)
 {
 	char cwd[1024];
 	FILE    *   ini ;
 
 	if (file_exist(CONFIG_FILE)){
 		printf("file exist %s\n",CONFIG_FILE);
-		parse_ini_file(CONFIG_FILE);
+		parse_ini_file(CONFIG_FILE,cfg);
 		return;
 	}
 
@@ -52,11 +52,11 @@ void create_ini_file(void)
 
 	fclose(ini);
 
-	parse_ini_file(CONFIG_FILE);
+	parse_ini_file(CONFIG_FILE,cfg);
 }
 
 
-int parse_ini_file(char * ini_name)
+int parse_ini_file(char * ini_name,struct configs* cfg)
 {
 	dictionary *ini ;
 
@@ -72,12 +72,15 @@ int parse_ini_file(char * ini_name)
 
 	iniparser_dump(ini, stderr);
 
-	home_dir = iniparser_getstring(ini, "Directory:ServerHomeDir", NULL);
-	disable_nagle_algorithm = iniparser_getboolean(ini, "Settings:UseNagles", -1);
-	allow_anonymous_login = iniparser_getboolean(ini, "Settings:AllowAnonymousLogin", -1);
+	home_dir = iniparser_getstring(ini,
+					"Directory:ServerHomeDir", NULL);
+	cfg->disable_nagle_algorithm = iniparser_getboolean(ini,
+					"Settings:UseNagles", -1);
+	cfg->allow_anonymous_login = iniparser_getboolean(ini,
+					"Settings:AllowAnonymousLogin", -1);
 
-	memset(server_dir,0,sizeof(server_dir));
-	strcpy(server_dir,home_dir);
+	memset(cfg->server_dir,0,sizeof(server_dir));
+	strcpy(cfg->server_dir,home_dir);
 
 	iniparser_freedict(ini);
 	return 0 ;

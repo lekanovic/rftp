@@ -114,15 +114,13 @@ int dele_dir(char* dir)
 
 	return 0;
 }
-void initialize_system()
+void initialize_system(struct configs* cfg)
 {
-	create_ini_file();
-	init_dir();
+	create_ini_file(cfg);
+	init_dir(cfg->server_dir);
 }
-int init_dir()
+int init_dir(const char* server_dir)
 {
-	strcat(server_dir,"/publish");
-
 	if (!dir_exist(server_dir)) {
 		printf("Creating dir %s\n",server_dir);
 		mkdir(server_dir, S_IRWXG );
@@ -132,7 +130,7 @@ int init_dir()
 
 	return 1;
 }
-int setup_user_env()
+int setup_user_env(const char* server_dir)
 {
 	if (chdir(server_dir)  != 0)
 		perror("chdir failed");
@@ -149,7 +147,8 @@ int change_grp(const char *group,const char *path)
 	char command[1024];
 
 	sprintf(command,"chgrp %s %s\n",group,path);
-	system(command);
+	if (system(command))
+		ERR("system\n");
 
 	return 1;
 }

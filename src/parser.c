@@ -29,14 +29,13 @@
 #define FILE_BUFFER_NAME	1024
 
 //http://mina.apache.org/ftpserver/ftp-commands.html
-extern int allow_anonymous_login;
 
 static int parse_msg(int,char*,char*);
 static int data_fd;
 
 enum SEND_TYPE send_mode=ascii;
 
-static int verify_login(int cmd_port, char* user_name)
+static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 {
 	char msg[BUF_SIZE];
 	int bytes;
@@ -48,7 +47,7 @@ static int verify_login(int cmd_port, char* user_name)
 			return 0;
 		}
 		if (strstr(msg,"USER") != NULL) {
-			if (allow_anonymous_login) {
+			if (cfg.allow_anonymous_login) {
 				if ( strstr(msg,"USER anonymous") != NULL) {
 					setup_user_env();
 					ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
@@ -64,7 +63,7 @@ static int verify_login(int cmd_port, char* user_name)
 			if (handle_pass(cmd_port,msg,user_name) == WRONG_PASSWD)
 				return 0;
 			else {
-				int userId = setup_user_env();
+				int userId = setup_user_env(cfg.server_dir);
 
 				DEBUG_PRINT(cmd_port,"SetUid=%d for %s\n",userId,user_name);
 
@@ -78,7 +77,7 @@ static int verify_login(int cmd_port, char* user_name)
 	}
 }
 
-int handle_msg(int client_sfd)
+int handle_msg(int client_sfd,struct configs cfg)
 {
 	char user_name[USER_NAME_LEN];
 	char buf[BUF_SIZE]={0};
@@ -86,7 +85,7 @@ int handle_msg(int client_sfd)
 
 	ftp_send(client_sfd,WELCOME_MSG,strlen(WELCOME_MSG),0);
 
-	if (!verify_login(client_sfd,user_name)){
+	if (!verify_login(client_sfd,user_name,cfg)){
 		ftp_send(client_sfd,GOODBYE,strlen(GOODBYE),0);
 		return 0;
 	}

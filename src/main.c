@@ -7,9 +7,6 @@
 #include "setup.h"
 
 int debug_mode = 0;
-int disable_nagle_algorithm = 0;
-char server_dir[1024];
-int allow_anonymous_login=0;
 
 void handler(int sig)
 {
@@ -26,10 +23,6 @@ int parse_arg(int argc, char** argv)
 		case 'd':
 			printf("using debug mode\n");
 			debug_mode=1;
-			break;
-		case 'n':
-			printf("disable Nagle's algorithm\n");
-			disable_nagle_algorithm = 1;
 			break;
 		case 'c':
 			break;

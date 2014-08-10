@@ -13,26 +13,14 @@
 #include "parser.h"
 #include "connect.h"
 #include "mem_op.h"
+#include "config_parser.h"
 
 #define HOSTNAME_LEN	200
 #define SERVER_PORT	21
 
 static int sfd;
-extern int disable_nagle_algorithm;
 
-void connection(void* argument)
-{
-	int client_sfd;
-
-	client_sfd = *((int*)argument);
-
-	if (disable_nagle_algorithm)
-		disable_nagle(client_sfd);
-
-	handle_msg(client_sfd);
-}
-
-static int handle_incomming_clients()
+static int handle_incomming_clients(struct configs cfg)
 {
 	int pid=0;
 	int client_sfd;
@@ -56,7 +44,10 @@ static int handle_incomming_clients()
 
 		close(sfd);
 
-		connection(&client_sfd);
+		if (cfg.disable_nagle_algorithm)
+			disable_nagle(client_sfd);
+
+		handle_msg(client_sfd,cfg);
 
 		get_ip_address(client_sfd,ipstr);
 
@@ -79,6 +70,8 @@ int start_server()
 	int port=SERVER_PORT,ret=0;
 	struct sockaddr_in server_addr;
 	struct hostent *he;
+	struct configs cfg;
+	cfg.server_dir = ftp_alloc(1024);
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
 		ERR("socket\n");
@@ -94,7 +87,7 @@ again:
 	get_ip_addr(&server_addr.sin_addr);
 	server_addr.sin_port = htons(port);
 
-	initialize_system();
+	initialize_system(&cfg);
 
 	printf("Server: %s %s %s:%d\n",
 		he->h_name,
@@ -114,10 +107,12 @@ again:
 		ERR("listen\n");
 
 	while(1) {
-		handle_incomming_clients();
+		handle_incomming_clients(cfg);
 	}
 
 	close(sfd);
+
+	ftp_free(cfg.server_dir);
 }
 
 void close_server()

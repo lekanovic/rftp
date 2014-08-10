@@ -1,7 +1,8 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
+#include "config_parser.h"
 int echo_msg(int);
-int handle_msg(int);
+int handle_msg(int,struct configs);
 int handle_list(int,char*);
 int handle_pwd(int);
 int handle_type(int,char*);
