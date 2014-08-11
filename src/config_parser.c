@@ -37,7 +37,7 @@ void create_ini_file(struct configs* cfg)
 		"\n"
 		"[Directory]\n"
 		"\n"
-		"ServerHomeDir = %s ;"
+		"ServerHomeDir = %s/publish ;"
 		"\n"
 		"\n"
 		"[Settings]\n"
@@ -81,8 +81,6 @@ int parse_ini_file(char * ini_name,struct configs* cfg)
 
 	memset(cfg->server_dir,0,DIR_LENGTH);
 	strcpy(cfg->server_dir,home_dir);
-
-	strncat(cfg->server_dir,"/publish",DIR_LENGTH);
 
 	iniparser_freedict(ini);
 	return 0 ;

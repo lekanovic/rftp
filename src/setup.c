@@ -83,11 +83,11 @@ again:
 		ERR("gethostbyname\n");
 	}
 
-	server_addr.sin_family = AF_INET;
-	get_ip_addr(&server_addr.sin_addr);
-	server_addr.sin_port = htons(port);
-
 	initialize_system(&cfg);
+
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	server_addr.sin_port = htons(cfg.port);
 
 	printf("Server: %s %s %s:%d\n",
 		he->h_name,
