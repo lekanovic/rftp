@@ -16,7 +16,6 @@
 #include "config_parser.h"
 
 #define HOSTNAME_LEN	200
-#define SERVER_PORT	21
 
 static int sfd;
 
@@ -67,7 +66,7 @@ static int handle_incomming_clients(struct configs cfg)
 int start_server()
 {
 	char hostname[HOSTNAME_LEN];
-	int port=SERVER_PORT,ret=0;
+	int ret=0;
 	struct sockaddr_in server_addr;
 	struct hostent *he;
 	struct configs cfg;
@@ -93,10 +92,10 @@ again:
 		he->h_name,
 		hostname,
 		inet_ntoa(server_addr.sin_addr),
-		port);
+		cfg.port);
 
 	if (bind(sfd, (struct sockaddr*)&server_addr,sizeof(server_addr)) < 0) {
-		port++;
+		cfg.port++;
 		sleep(1);
 		perror("bind");
 		goto again;
