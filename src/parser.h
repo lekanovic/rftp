@@ -1,29 +1,40 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 #include "config_parser.h"
-int echo_msg(int);
+
+struct req_input
+{
+	int client_fd;
+	char* msg;
+	char* user_name;
+};
+
+
+int handle_list(struct req_input);
+int handle_pwd(struct req_input);
+int handle_type(struct req_input);
+int handle_port(struct req_input);
+int handle_pasv(struct req_input);
+int handle_cwd(struct req_input);
+int handle_retr(struct req_input);
+int handle_stor(struct req_input);
+int handle_user(struct req_input);
+int handle_syst(struct req_input);
+int handle_pass(struct req_input);
+int handle_mkd(struct req_input);
+int handle_rmd(struct req_input);
+int handle_dele(struct req_input);
+int handle_feat(struct req_input);
+int handle_noop(struct req_input);
+int handle_nlst(struct req_input);
+int handle_size(struct req_input);
+int handle_site(struct req_input);
+int handle_rnfr(struct req_input);
+int handle_mdtm(struct req_input);
+int handle_epsv(struct req_input);
+int handle_quit(struct req_input);
+
 int handle_msg(int,struct configs);
-int handle_list(int,char*);
-int handle_pwd(int);
-int handle_type(int,char*);
-int handle_port(int,char*);
-int handle_pasv(int);
-int handle_cwd(int,char*);
-int handle_retr(int,char*);
-int handle_stor(int,char*);
-int handle_user(int,char*,char*);
-int handle_syst(int,char*);
-int handle_pass(int,char*,char*);
-int handle_mkd(int,char*);
-int handle_rmd(int,char*);
-int handle_dele(int,char*);
-int handle_feat(int);
-int handle_noop(int);
-int handle_nlst(int);
-int handle_size(int,char*);
-int handle_site(int,char*);
-int handle_rnfr(int,char*);
-int handle_mdtm(int,char*);
 
 enum SEND_TYPE {
 	ascii,
@@ -31,5 +42,7 @@ enum SEND_TYPE {
 	image,
 	local
 };
+
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 #endif
