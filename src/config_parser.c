@@ -44,6 +44,7 @@ void create_ini_file(struct configs* cfg)
 		"\n"
 		"DisableNagle = yes ;\n"
 		"AllowAnonymousLogin = yes ;\n"
+		"port = 21 ;\n"
 		"\n"
 	,cwd);
 
@@ -75,6 +76,8 @@ int parse_ini_file(char * ini_name,struct configs* cfg)
 					"Settings:UseNagles", -1);
 	cfg->allow_anonymous_login = iniparser_getboolean(ini,
 					"Settings:AllowAnonymousLogin", -1);
+	cfg->port =  iniparser_getint(ini,
+					"Settings:port",0);
 
 	memset(cfg->server_dir,0,DIR_LENGTH);
 	strcpy(cfg->server_dir,home_dir);
