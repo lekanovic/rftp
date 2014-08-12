@@ -2,8 +2,9 @@
 
 # ./autogen.sh - creates e.g. the configure script
 # ./configure  - checks dependencies and can be given compile options (--enable-xx)
-# make - build the executables and libraries
 
-% make clean   - clean all temporary files
+# make         - build the executables and libraries
+# make clean   - clean all temporary files
 # make install - install the binaries, libraries and documentation the system, requires root privileges
-% make dist    - create a distribution tarball
+# make dist    - create a distribution tarball
+# checkinstall - create debian package
