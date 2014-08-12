@@ -636,16 +636,15 @@ int handle_list(struct req_input in)
 int handle_pwd(struct req_input in)
 {
 	char *msg;
+	char tmp[NAME_MAX];
 
 	msg = ftp_calloc(BUF_SIZE, sizeof(char));
 
-	strcpy(msg, "257 \"");
-
-	if (getcwd(msg+strlen(msg),BUF_SIZE) == NULL) {
+	if (getcwd(tmp,NAME_MAX) == NULL) {
 		ERR("getcwd\n");
 	}
 
-	strcat(msg,"\" is the current directory.\r\n");
+	sprintf(msg,"257 \"%s\" is the current directory.\r\n",tmp);
 
 	ftp_send(in.client_fd,msg,strlen(msg),0);
 
