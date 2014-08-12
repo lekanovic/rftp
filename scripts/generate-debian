@@ -1,0 +1,18 @@
+#!/bin/bash
+
+DEPENDENCIES=""
+
+VERSION=$1
+LICENCE="UNKNOWN"
+MAINTAINER="lekanovic@gmail.com"
+PACKAGE_NAME="rftpserver"
+
+checkinstall -D -y \
+                    --gzman=yes \
+                    --install=no \
+                    --pkgname=$PACKAGE_NAME \
+                    --pkglicense=$LICENCE \
+                    --pkgversion=$VERSION \
+                    --maintainer=$MAINTAINER \
+                    --requires="$DEPENDENCIES"
+
