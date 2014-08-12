@@ -2,12 +2,12 @@
 
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = server
+bin_PROGRAMS = rftpserver
 
-server_LDFLAGS = -pthread
-server_LDADD   = -lcrypt libiniparser.i686.a
+rftpserver_LDFLAGS = -pthread
+rftpserver_LDADD = -lcrypt libiniparser.i686.a
 
-server_SOURCES = \
+rftpserver_SOURCES = \
 	connect.c \
 	file_op.c \
 	helpers.c \
