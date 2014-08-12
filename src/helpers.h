@@ -17,6 +17,6 @@ int init_dir(const char*);
 int change_working_dir();
 int change_grp(const char*,const char*);
 int dele_dir(char*);
-int setup_user_env();
+int setup_user_env(const char*);
 void initialize_system(struct configs*);
 #endif

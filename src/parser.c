@@ -114,7 +114,7 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 		if (strstr(msg,"USER") != NULL) {
 			if (cfg.allow_anonymous_login) {
 				if ( strstr(msg,"USER anonymous") != NULL) {
-					setup_user_env();
+					setup_user_env(cfg.server_dir);
 					ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
 					return 1;
 				}
