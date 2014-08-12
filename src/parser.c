@@ -155,15 +155,12 @@ int handle_msg(int client_sfd,struct configs cfg)
 		return 0;
 	}
 
-	while(1) {
+	while(response != END_CONNECTION) {
 		if ((bytes = ftp_recv(client_sfd,buf,BUF_SIZE,0)) == 0) {
 			printf("Client closed connection\n");
 			return 0;
 		}
 		response = parse_msg(client_sfd,buf,user_name);
-		if (response == END_CONNECTION) {
-			break;
-		}
 
 		memset(buf,0,BUF_SIZE);
 	}
