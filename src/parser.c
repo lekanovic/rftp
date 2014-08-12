@@ -401,19 +401,22 @@ int handle_mkd(struct req_input in)
 	char* send_msg;
 	char* dir = in.msg + 4;
 	int ret;
+	int size=0;
 
 	rm_crlf(dir);
 
 	if ((ret=mkdir(dir,S_IRWXU)) < 0) {
 		ERR("mkdir\n");
-		send_msg = ftp_calloc(4+strlen(FILE_UNAVAILABLE),sizeof(char));
+		size = (4+strlen(FILE_UNAVAILABLE));
+		send_msg = ftp_calloc(size,sizeof(char));
 		sprintf(send_msg,"%s",FILE_UNAVAILABLE);
 	} else {
-		send_msg = ftp_calloc(4+strlen(dir)+strlen("\'directory created\'")+1,
-				 sizeof(char));
+		size = (4+strlen(dir)+strlen("\'directory created\'")+3);
+		send_msg = ftp_calloc(size, sizeof(char));
 		sprintf(send_msg,"257 %s directory created\r\n",dir);
 	}
-	ftp_send(in.client_fd,send_msg,strlen(send_msg),0);
+
+	ftp_send(in.client_fd,send_msg,strnlen(send_msg,size),0);
 
 	ftp_free(send_msg);
 	return 0;
