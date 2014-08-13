@@ -56,7 +56,7 @@ struct ftp_cmd_func ftp_cmds[] = {
 	{ "ENC", NULL },
 	{ "EPRT", NULL },
 	{ "FEAT", handle_feat },
-	{ "LANG", handle_list },
+	{ "LANG", NULL },
 	{ "LIST", handle_list },
 	{ "LPRT", NULL },
 	{ "LPSV", NULL },
