@@ -82,7 +82,7 @@ struct ftp_cmd_func ftp_cmds[] = {
 	{ "RMD", handle_rmd },
 	{ "RNFR", handle_rnfr },
 	{ "SITE", handle_site },
-	{ "SIZE", NULL },
+	{ "SIZE", handle_size },
 	{ "SMNT", NULL },
 	{ "STAT", NULL },
 	{ "STOR", handle_stor },
