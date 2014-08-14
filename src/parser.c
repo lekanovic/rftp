@@ -39,7 +39,7 @@ enum SEND_TYPE send_mode=ascii;
 struct ftp_cmd_func
 {
 	char* cmd;
-	int (*func_ptr)(struct req_input in);
+	int (*func_ptr)(struct req_input* in);
 };
 
 struct ftp_cmd_func ftp_cmds[] = {
@@ -120,12 +120,12 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 				}
 			}
 
-			if (handle_user(in) == NO_USER) {
+			if (handle_user(&in) == NO_USER) {
 				DEBUG_PRINT(cmd_port,"%s is trying to login\n",user_name);
 				return 0;
 			}
 		} else if ( strstr(msg,"PASS") != NULL) {
-			if (handle_pass(in) == WRONG_PASSWD)
+			if (handle_pass(&in) == WRONG_PASSWD)
 				return 0;
 			else {
 				int userId = setup_user_env(cfg.server_dir);
@@ -135,7 +135,7 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 				return 1;
 			}
 		}  else if ( strstr(msg,"FEAT") != NULL) {
-			handle_feat(in);
+			handle_feat(&in);
 		}
 
 		memset(msg,0,BUF_SIZE);
@@ -181,7 +181,7 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 	for (;i < size ; i++) {
 		if ( strstr(msg,ftp_cmds[i].cmd) != NULL &&
 			ftp_cmds[i].func_ptr != NULL) {
-			ret = ftp_cmds[i].func_ptr(in);
+			ret = ftp_cmds[i].func_ptr(&in);
 			break;
 
 		}
@@ -190,25 +190,25 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 	return ret;
 }
 //https://tools.ietf.org/html/rfc3659#page-10
-int handle_mdtm(struct req_input in)
+int handle_mdtm(struct req_input* in)
 {
 	// MDTM remote-filename
 	char buf[256];
 	struct tm *foo;
 	struct stat attrib;
-	char *file = in.msg + 5;
+	char *file = in->msg + 5;
 
 	rm_crlf(file);
 
 	if (!file_exist(file)) {
-		ftp_send(in.client_fd,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
+		ftp_send(in->client_fd,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
 		return 0;
 	}
 
 	if (dir_exist(file)) {
 		char message[128];
 		sprintf(message,"550 %s is not retrievable\r\n",file);
-		ftp_send(in.client_fd,message,strlen(message),0);
+		ftp_send(in->client_fd,message,strlen(message),0);
 		return 0;
 	}
 
@@ -233,15 +233,15 @@ int handle_mdtm(struct req_input in)
 		foo->tm_min,
 		foo->tm_sec);
 
-	ftp_send(in.client_fd,buf,strlen(buf),0);
+	ftp_send(in->client_fd,buf,strlen(buf),0);
 
 	return 0;
 }
 
-int handle_rnfr(struct req_input in)
+int handle_rnfr(struct req_input* in)
 {
 	//RNFR /home/tester/Untitled Folder
-	char *file_path = in.msg + 5;
+	char *file_path = in->msg + 5;
 	char old_file_name[FILE_BUFFER_NAME];
 	char recv_msg[BUF_SIZE];
 	int bytes;
@@ -254,21 +254,21 @@ int handle_rnfr(struct req_input in)
 	strcpy(old_file_name,file_path);
 
 	if (!file_exist(file_path)){
-		DEBUG_PRINT(in.client_fd,"File does not exist %s\n",file_path);
-		ftp_send(in.client_fd,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
+		DEBUG_PRINT(in->client_fd,"File does not exist %s\n",file_path);
+		ftp_send(in->client_fd,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
 		return 0;
 	}
 
-	ftp_send(in.client_fd,REQUEST_FILE_ACTION,strlen(REQUEST_FILE_ACTION),0);
+	ftp_send(in->client_fd,REQUEST_FILE_ACTION,strlen(REQUEST_FILE_ACTION),0);
 
-	if ((bytes = ftp_recv(in.client_fd,recv_msg,BUF_SIZE,0)) == 0) {
+	if ((bytes = ftp_recv(in->client_fd,recv_msg,BUF_SIZE,0)) == 0) {
 		ERR("Client closed connection\n");
 		return 0;
 	}
 	// RNTO must be precedded with an RNFR
 	if (strstr(recv_msg,"RNTO") == NULL){
 		ERR("Error RNTO command must be followed by an RNFR command\n");
-		ftp_send(in.client_fd,BAD_COMMAND_SEQUENCE,strlen(BAD_COMMAND_SEQUENCE),0);
+		ftp_send(in->client_fd,BAD_COMMAND_SEQUENCE,strlen(BAD_COMMAND_SEQUENCE),0);
 		return 0;
 	}
 
@@ -279,49 +279,49 @@ int handle_rnfr(struct req_input in)
 	rm_crlf(new_file_name);
 
 	if(rename(old_file_name, new_file_name) == 0) {
-		DEBUG_PRINT(in.client_fd,"[%s] has been renamed to [%s].\n", old_file_name, new_file_name);
+		DEBUG_PRINT(in->client_fd,"[%s] has been renamed to [%s].\n", old_file_name, new_file_name);
 	} else {
 		fprintf(stderr, "Error renaming %s to %s\n", old_file_name,new_file_name);
 		printf("an error: %s\n", strerror(errno));
-		ftp_send(in.client_fd,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
+		ftp_send(in->client_fd,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
 		return -1;
 	}
 
-	ftp_send(in.client_fd,FILE_ACTION_DONE,strlen(FILE_ACTION_DONE),0);
+	ftp_send(in->client_fd,FILE_ACTION_DONE,strlen(FILE_ACTION_DONE),0);
 	memset(old_file_name,0,FILE_BUFFER_NAME);
 
 	return 0;
 }
-int handle_site(struct req_input in)
+int handle_site(struct req_input* in)
 {
-	ftp_send(in.client_fd,FEAT_NOT_IMPLEMENTED,strlen(FEAT_NOT_IMPLEMENTED),0);
+	ftp_send(in->client_fd,FEAT_NOT_IMPLEMENTED,strlen(FEAT_NOT_IMPLEMENTED),0);
 	return 0;
 }
-int handle_size(struct req_input in)
+int handle_size(struct req_input* in)
 {
 	char buf[BUF_SIZE]={0};
 	struct stat st;
 	int fd;
-	char *file = in.msg + 5;
+	char *file = in->msg + 5;
 
 	rm_crlf(file);
 
 	if ((fd=stat(file,&st)) < 0) {
 		ERR("stat\n");
-		ftp_send(in.client_fd,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
+		ftp_send(in->client_fd,FILE_NOT_FOUND,strlen(FILE_NOT_FOUND),0);
 	} else {
 		sprintf(buf,"213 %d\r\n",(int)st.st_size);
-		ftp_send(in.client_fd,buf,strlen(buf),0);
+		ftp_send(in->client_fd,buf,strlen(buf),0);
 	}
 
 	return 0;
 }
-int handle_nlst(struct req_input in)
+int handle_nlst(struct req_input* in)
 {
 	int i=0;
 	char **ppdir;
 
-	ftp_send(in.client_fd,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+	ftp_send(in->client_fd,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
 
 	if ((ppdir=ls(ONLY_FILE_NAMES)) != NULL) {
 		for (i=0; ppdir[i] != NULL;i++){
@@ -331,27 +331,27 @@ int handle_nlst(struct req_input in)
 		ftp_free(ppdir);
 	}
 
-	ftp_send(in.client_fd,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+	ftp_send(in->client_fd,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
 	close(data_fd);
 
 	return 0;
 }
-int handle_noop(struct req_input in)
+int handle_noop(struct req_input* in)
 {
-	ftp_send(in.client_fd,SEND_OK,strlen(SEND_OK),0);
+	ftp_send(in->client_fd,SEND_OK,strlen(SEND_OK),0);
 	return 0;
 }
-int handle_feat(struct req_input in)
+int handle_feat(struct req_input* in)
 {
-	ftp_send(in.client_fd,FEAT_NOT_IMPLEMENTED,strlen(FEAT_NOT_IMPLEMENTED),0);
+	ftp_send(in->client_fd,FEAT_NOT_IMPLEMENTED,strlen(FEAT_NOT_IMPLEMENTED),0);
 	return 0;
 }
 // DELE <SP> <pathname> <CRLF>
-int handle_dele(struct req_input in)
+int handle_dele(struct req_input* in)
 {
 	int ret;
-	char *send_msg,*file = in.msg + 5;
+	char *send_msg,*file = in->msg + 5;
 
 	rm_crlf(file);
 
@@ -363,7 +363,7 @@ int handle_dele(struct req_input in)
 
 	sprintf(send_msg,"250 %s has been deleted\r\n",file);
 
-	ftp_send(in.client_fd,send_msg,strlen(send_msg),0);
+	ftp_send(in->client_fd,send_msg,strlen(send_msg),0);
 
 	ftp_free(send_msg);
 
@@ -371,10 +371,10 @@ int handle_dele(struct req_input in)
 }
 // RMD  <SP> <pathname> <CRLF>
 // 250 Requested file action okay, completed.
-int handle_rmd(struct req_input in)
+int handle_rmd(struct req_input* in)
 {
 	char* send_msg;
-	char* dir = in.msg + 4;
+	char* dir = in->msg + 4;
 
 	rm_crlf(dir);
 
@@ -388,15 +388,15 @@ int handle_rmd(struct req_input in)
 				sizeof(char));
 		sprintf(send_msg,"%s",FILE_ACTION_OK);
 	}
-	ftp_send(in.client_fd,send_msg,strlen(send_msg),0);
+	ftp_send(in->client_fd,send_msg,strlen(send_msg),0);
 
 	ftp_free(send_msg);
 	return 0;
 }
-int handle_mkd(struct req_input in)
+int handle_mkd(struct req_input* in)
 {
 	char* send_msg;
-	char* dir = in.msg + 4;
+	char* dir = in->msg + 4;
 	int ret;
 	int size=0;
 
@@ -413,85 +413,85 @@ int handle_mkd(struct req_input in)
 		sprintf(send_msg,"257 %s directory created\r\n",dir);
 	}
 
-	ftp_send(in.client_fd,send_msg,strnlen(send_msg,size),0);
+	ftp_send(in->client_fd,send_msg,strnlen(send_msg,size),0);
 
 	ftp_free(send_msg);
 	return 0;
 }
-int handle_type(struct req_input in)
+int handle_type(struct req_input* in)
 {
-	if ( strstr(in.msg,"TYPE A") != NULL) {
+	if ( strstr(in->msg,"TYPE A") != NULL) {
 		send_mode=ascii;
-		ftp_send(in.client_fd,TYPE_ASCII_MODE,strlen(TYPE_ASCII_MODE),0);
-	} else if ( strstr(in.msg,"TYPE I") != NULL) {
+		ftp_send(in->client_fd,TYPE_ASCII_MODE,strlen(TYPE_ASCII_MODE),0);
+	} else if ( strstr(in->msg,"TYPE I") != NULL) {
 		send_mode=image;
-		ftp_send(in.client_fd,TYPE_BINARY_MODE,strlen(TYPE_BINARY_MODE),0);
-	} else if ( strstr(in.msg,"TYPE E") != NULL) {
+		ftp_send(in->client_fd,TYPE_BINARY_MODE,strlen(TYPE_BINARY_MODE),0);
+	} else if ( strstr(in->msg,"TYPE E") != NULL) {
 		send_mode=ebcdic;
-		ftp_send(in.client_fd,TYPE_EBCDIC_MODE,strlen(TYPE_EBCDIC_MODE),0);
+		ftp_send(in->client_fd,TYPE_EBCDIC_MODE,strlen(TYPE_EBCDIC_MODE),0);
 	} else {
 		ERR("No TYPE\n");
 	}
 
 	return 0;
 }
-int handle_pass(struct req_input in)
+int handle_pass(struct req_input* in)
 {
-	char* passwd = in.msg + 5;
+	char* passwd = in->msg + 5;
 
 	rm_crlf(passwd);
 
-	if (!check_passwd(in.user_name,passwd)) {
-		ftp_send(in.client_fd,AUTHEN_FAILED,
+	if (!check_passwd(in->user_name,passwd)) {
+		ftp_send(in->client_fd,AUTHEN_FAILED,
 				strlen(AUTHEN_FAILED),0);
-		DEBUG_PRINT(in.client_fd,"User %s typed incorrect passwd: %s\n",in.user_name,passwd);
+		DEBUG_PRINT(in->client_fd,"User %s typed incorrect passwd: %s\n",in->user_name,passwd);
 		return WRONG_PASSWD;
 	}
 
-	DEBUG_PRINT(in.client_fd,"User %s logged in successfully\n",in.user_name);
+	DEBUG_PRINT(in->client_fd,"User %s logged in successfully\n",in->user_name);
 
-	ftp_send(in.client_fd,LOG_IN_OK,strlen(LOG_IN_OK),0);
+	ftp_send(in->client_fd,LOG_IN_OK,strlen(LOG_IN_OK),0);
 
 	return 0;
 }
-int handle_syst(struct req_input in)
+int handle_syst(struct req_input* in)
 {
-	ftp_send(in.client_fd,SYSTEM_TYPE,strlen(SYSTEM_TYPE),0);
+	ftp_send(in->client_fd,SYSTEM_TYPE,strlen(SYSTEM_TYPE),0);
 	return 0;
 }
-int handle_user(struct req_input in)
+int handle_user(struct req_input* in)
 {
-	memset(in.user_name,0,30);
-	strcpy(in.user_name,in.msg + 5);
+	memset(in->user_name,0,30);
+	strcpy(in->user_name,in->msg + 5);
 
-	rm_crlf(in.user_name);
+	rm_crlf(in->user_name);
 
-	if (!find_user(in.user_name)) {
-		ftp_send(in.client_fd,INVALID_USER_NAME,
+	if (!find_user(in->user_name)) {
+		ftp_send(in->client_fd,INVALID_USER_NAME,
 				strlen(INVALID_USER_NAME),0);
-		DEBUG_PRINT(in.client_fd,"%s could not be found\n",in.user_name);
+		DEBUG_PRINT(in->client_fd,"%s could not be found\n",in->user_name);
 		return NO_USER;
 	}
 
-	ftp_send(in.client_fd,NEED_PASSWD,
+	ftp_send(in->client_fd,NEED_PASSWD,
 			strlen(NEED_PASSWD),0);
 
 	return 0;
 }
-int handle_stor(struct req_input in)
+int handle_stor(struct req_input* in)
 {
 	int fd,bytes,data,buf_size;
-	char *buf,*file = in.msg + 5;
+	char *buf,*file = in->msg + 5;
 	time_t start,finish;
 	struct stat st;
 
 	rm_crlf(file);
 
-	buf_size = get_recvbuf_size(in.client_fd);
+	buf_size = get_recvbuf_size(in->client_fd);
 
 	buf = ftp_alloc(buf_size);
 
-	ftp_send(in.client_fd,START_STOR_CMD,strlen(START_STOR_CMD),0);
+	ftp_send(in->client_fd,START_STOR_CMD,strlen(START_STOR_CMD),0);
 
 	if ((fd=open(file,O_CREAT|O_RDWR,S_IRWXU)) < 0)
 		ERR("open\n");
@@ -511,12 +511,12 @@ int handle_stor(struct req_input in)
 	if (stat(file,&st) < 0)
 		ERR("stat\n");
 
-	DEBUG_PRINT(in.client_fd,"File %s %d bytes received in %ldsec\n",
+	DEBUG_PRINT(in->client_fd,"File %s %d bytes received in %ldsec\n",
 		file,
 		(int)st.st_size,
 		(long)finish);
 
-	ftp_send(in.client_fd,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+	ftp_send(in->client_fd,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
 	close(fd);
 	close(data_fd);
@@ -524,30 +524,30 @@ int handle_stor(struct req_input in)
 
 	return 0;
 }
-int handle_retr(struct req_input in)
+int handle_retr(struct req_input* in)
 {
 	int fd,bytes,buf_size;
 	time_t start,finish;
-	char *buf,*file = in.msg + 5;
+	char *buf,*file = in->msg + 5;
 	struct stat st;
 
 	rm_crlf(file);
 
-	buf_size = get_recvbuf_size(in.client_fd);
+	buf_size = get_recvbuf_size(in->client_fd);
 
 	buf = ftp_alloc(buf_size);
 
 	if ((fd = open(file,O_RDONLY)) < 0) {
-		ftp_send(in.client_fd,FILE_UNAVAILABLE,strlen(FILE_UNAVAILABLE),0);
+		ftp_send(in->client_fd,FILE_UNAVAILABLE,strlen(FILE_UNAVAILABLE),0);
 		return 0;
 	}
 
 	if ( send_mode == ascii) {
-		ftp_send(in.client_fd,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+		ftp_send(in->client_fd,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
 	} else if ( send_mode == image) {
-		ftp_send(in.client_fd,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
+		ftp_send(in->client_fd,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
 	} else if ( send_mode == ebcdic) {
-		ftp_send(in.client_fd,OPEN_EBCDIC_MODE,strlen(OPEN_EBCDIC_MODE),0);
+		ftp_send(in->client_fd,OPEN_EBCDIC_MODE,strlen(OPEN_EBCDIC_MODE),0);
 	} else if ( send_mode == local) {
 
 	}
@@ -563,12 +563,12 @@ int handle_retr(struct req_input in)
 	if (stat(file,&st) < 0)
 		ERR("stat\n");
 
-	DEBUG_PRINT(in.client_fd,"File %s %d bytes sent in %ldsec\n",
+	DEBUG_PRINT(in->client_fd,"File %s %d bytes sent in %ldsec\n",
 		file,
 		(int)st.st_size,
 		(long)finish);
 
-	ftp_send(in.client_fd,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+	ftp_send(in->client_fd,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
 	close(data_fd);
 	close(fd);
@@ -576,21 +576,21 @@ int handle_retr(struct req_input in)
 
 	return 0;
 }
-int handle_cwd(struct req_input in)
+int handle_cwd(struct req_input* in)
 {
 	char *str;
-	if ((str = ftp_calloc(strlen(in.msg),sizeof(char))) == NULL)
+	if ((str = ftp_calloc(strlen(in->msg),sizeof(char))) == NULL)
 		ERR("calloc\n");
 
-	strcpy(str,in.msg+4);
+	strcpy(str,in->msg+4);
 
 	rm_crlf(str);
 
 	if (chdir(str) < 0) {
 		ERR("chdir\n")
-		ftp_send(in.client_fd,NOT_AN_DIRECTORY,strlen(NOT_AN_DIRECTORY),0);
+		ftp_send(in->client_fd,NOT_AN_DIRECTORY,strlen(NOT_AN_DIRECTORY),0);
 	} else {
-		ftp_send(in.client_fd,WORKING_DIR_CHANGED,strlen(WORKING_DIR_CHANGED),0);
+		ftp_send(in->client_fd,WORKING_DIR_CHANGED,strlen(WORKING_DIR_CHANGED),0);
 	}
 
 	ftp_free(str);
@@ -598,18 +598,18 @@ int handle_cwd(struct req_input in)
 	return 0;
 
 }
-int handle_list(struct req_input in)
+int handle_list(struct req_input* in)
 {
 	int i=0;
 	char **ppdir;
 	char data[5*1024]={0};
 
 	if ( send_mode == ascii) {
-		ftp_send(in.client_fd,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
+		ftp_send(in->client_fd,OPEN_ASCII_MODE,strlen(OPEN_ASCII_MODE),0);
 	} else if ( send_mode == image) {
-		ftp_send(in.client_fd,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
+		ftp_send(in->client_fd,OPEN_BINARY_MODE,strlen(OPEN_BINARY_MODE),0);
 	} else if ( send_mode == ebcdic) {
-		ftp_send(in.client_fd,OPEN_EBCDIC_MODE,strlen(OPEN_EBCDIC_MODE),0);
+		ftp_send(in->client_fd,OPEN_EBCDIC_MODE,strlen(OPEN_EBCDIC_MODE),0);
 	} else if ( send_mode == local) {
 
 	}
@@ -624,13 +624,13 @@ int handle_list(struct req_input in)
 
 	ftp_send_mode(data_fd,data,strlen(data),0,send_mode);
 
-	ftp_send(in.client_fd,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
+	ftp_send(in->client_fd,TRANSFER_COMPLETE,strlen(TRANSFER_COMPLETE),0);
 
 	close(data_fd);
 
 	return 2;
 }
-int handle_pwd(struct req_input in)
+int handle_pwd(struct req_input* in)
 {
 	char *msg;
 	char tmp[NAME_MAX];
@@ -643,7 +643,7 @@ int handle_pwd(struct req_input in)
 
 	sprintf(msg,"257 \"%s\" is the current directory.\r\n",tmp);
 
-	ftp_send(in.client_fd,msg,strlen(msg),0);
+	ftp_send(in->client_fd,msg,strlen(msg),0);
 
 	ftp_free(msg);
 
@@ -657,7 +657,7 @@ int handle_pwd(struct req_input in)
  *
  * ip[4]*256+ip[5] => 178,16 => 178*256 + 16 = 45584;
  */
-int handle_pasv(struct req_input in)
+int handle_pasv(struct req_input* in)
 {
 	int sfd,client_pasv;
 	int port=45584,a=178,b=16;
@@ -690,19 +690,19 @@ again:
 
 	sprintf(msg,"227 Entering Passive Mode (%s,%d,%d)\r\n",ip,a,b);
 
-	ftp_send(in.client_fd,msg,strlen(msg),0);
+	ftp_send(in->client_fd,msg,strlen(msg),0);
 
 	if ((data_fd = accept(sfd,(struct sockaddr*)&address,&addrlen)) < 0)
 		ERR("accept\n");
 
 	if (data_fd < 0) {
-		ftp_send(in.client_fd,CANNOT_OPEN_DATA_CON,
+		ftp_send(in->client_fd,CANNOT_OPEN_DATA_CON,
 				strlen(CANNOT_OPEN_DATA_CON),0);
 	}
 	return client_pasv;
 }
 
-int handle_port(struct req_input in)
+int handle_port(struct req_input* in)
 {
 	int fd;
 	char* pch;
@@ -710,7 +710,7 @@ int handle_port(struct req_input in)
 	int ip[6],i=0;
 	struct sockaddr_in serv_addr;
 
-	pch = strtok(in.msg," ,");
+	pch = strtok(in->msg," ,");
 	pch = strtok(NULL," ,");
 
 	while (pch != NULL) {
@@ -724,27 +724,27 @@ int handle_port(struct req_input in)
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(ip[4]*256+ip[5]);
 
-	DEBUG_PRINT(in.client_fd,"Connecting to %s:%d\n",inet_ntoa(serv_addr.sin_addr),serv_addr.sin_port);
+	DEBUG_PRINT(in->client_fd,"Connecting to %s:%d\n",inet_ntoa(serv_addr.sin_addr),serv_addr.sin_port);
 
 	fd = socket(AF_INET,SOCK_STREAM,0);
 	if (connect(fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
 		ERR("connect\n");
 
-	ftp_send(in.client_fd,PORT_CMD_OK,strlen(PORT_CMD_OK),0);
+	ftp_send(in->client_fd,PORT_CMD_OK,strlen(PORT_CMD_OK),0);
 
 	return fd;
 }
 
-int handle_epsv(struct req_input in)
+int handle_epsv(struct req_input* in)
 {
-	ftp_send(in.client_fd,
+	ftp_send(in->client_fd,
 		COMMAND_NOT_UNDERSTOOD,
 		strlen(COMMAND_NOT_UNDERSTOOD),0);
 	return 0;
 }
 
-int handle_quit(struct req_input in)
+int handle_quit(struct req_input* in)
 {
-	ftp_send(in.client_fd,GOODBYE,strlen(GOODBYE),0);
+	ftp_send(in->client_fd,GOODBYE,strlen(GOODBYE),0);
 	return END_CONNECTION;
 }
