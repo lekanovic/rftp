@@ -1,8 +1,10 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from basetest import BaseTest
 import subprocess
 import md5
+import sys
 
 
 class ConnectTest(BaseTest):
@@ -66,7 +68,15 @@ class ConnectTest(BaseTest):
             self.print_result(True)
 
 print("*** START CONNECT TEST ***")
-c = ConnectTest("0.0.0.0", 21)
+
+if len(sys.argv) == 3:
+    ip = sys.argv[1]
+    port = sys.argv[2]
+else:
+    ip = "127.0.0.1"
+    port = 7000
+
+c = ConnectTest(ip, port)
 c.createFile()
 c.connect()
 c.storeCmd()
