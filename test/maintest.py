@@ -3,11 +3,12 @@
 
 from connectest import ConnectTest
 from speedtest import SpeedTest
+from putgettest import PutgetTest
 import sys
 import time
 
 
-def main(ip, port):
+def runtestsuite(ip, port):
     test = ConnectTest(ip, port)
     test.createFile()
     test.connect()
@@ -25,17 +26,35 @@ def main(ip, port):
     time_start = time.time()
     test.storCmd()
     delta = (time.time() - time_start)
-    data = "time to upload file %f sec, speed %d MB/s" % ((delta, filesize / delta))
+    msg = "time to upload file "
+    data = "%s %f sec, speed %d MB/s" % (msg, delta, (filesize / delta))
     print(data)
 
     time_start = time.time()
     test.retrCmd()
     delta = (time.time() - time_start)
-    data = "time to upload file %f sec, speed %d MB/s" % ((delta, filesize / delta))
+    data = "%s %f sec, speed %d MB/s" % (msg, delta, (filesize / delta))
     print(data)
 
     test.deleCmd()
     test.disconnect()
+
+    test = PutgetTest(ip, port)
+    test.connect()
+    test.listTest()
+    test.pwdTest()
+    test.cmdTest()
+    test.storTest()
+    test.retrTest()
+    test.mkdTest()
+    test.rmdTest()
+    test.asciiTest()
+    test.binarymodeTest()
+    test.deleTest()
+    test.disconnect()
+
+def main(ip, port):
+    runtestsuite(ip, port)
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:

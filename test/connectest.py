@@ -80,7 +80,7 @@ class ConnectTest(BaseTest):
 
 '''
 print("*** START CONNECT TEST ***")
-
+import sys
 if len(sys.argv) == 3:
     ip = sys.argv[1]
     port = sys.argv[2]
