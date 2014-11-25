@@ -4,7 +4,6 @@
 from basetest import BaseTest
 import subprocess
 import md5
-import sys
 
 
 class ConnectTest(BaseTest):
@@ -26,6 +25,10 @@ class ConnectTest(BaseTest):
         self.hashvalue = hash_obj.hexdigest()
         print((self.hashvalue))
 
+    def deleteFile(self):
+        cmd = "rm %s" % self.filename
+        subprocess.call(cmd, shell=True)
+
     def checkHash(self):
         hash_obj = md5.new()
         hash_obj.update(open(self.filename).read())
@@ -38,7 +41,7 @@ class ConnectTest(BaseTest):
         else:
             self.print_result(True)
 
-    def storeCmd(self):
+    def storCmd(self):
         try:
             f = open(self.filename, 'rb')
             self.ftp.storbinary('STOR ' + self.filename, f)
@@ -58,6 +61,14 @@ class ConnectTest(BaseTest):
             print(e)
             self.print_result(False)
 
+        compare = "250 " + self.filename + " has been deleted"
+        result = self.ftp.sendcmd('DELE ' + self.filename)
+
+        if result != compare:
+            self.print_result(False)
+        else:
+            self.print_result(True)
+
     def deleCmd(self):
         compare = "250 " + self.filename + " has been deleted"
         result = self.ftp.sendcmd('DELE ' + self.filename)
@@ -67,20 +78,22 @@ class ConnectTest(BaseTest):
         else:
             self.print_result(True)
 
+'''
 print("*** START CONNECT TEST ***")
 
 if len(sys.argv) == 3:
     ip = sys.argv[1]
     port = sys.argv[2]
 else:
-    ip = "127.0.0.1"
-    port = 7000
+    ip = "0.0.0.0"
+    port = 21
 
 c = ConnectTest(ip, port)
 c.createFile()
 c.connect()
-c.storeCmd()
+c.storCmd()
 c.retrCmd()
 c.checkHash()
 c.deleCmd()
 c.disconnect()
+'''
