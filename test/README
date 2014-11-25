@@ -9,5 +9,4 @@ User name must be "tester" and must have the password "celeron"
 Howto run the whole test suite
 
 1. cd test
-2. bash run_all_tests.sh ip port
-	ex: bash run_all_tests.sh 10.97.0.112 21
+2. python maintest.py
