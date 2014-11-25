@@ -4,11 +4,13 @@
 from connectest import ConnectTest
 from speedtest import SpeedTest
 from putgettest import PutgetTest
+from renamefoldertest import RenamefolderTest
 import sys
 import time
 
 
 def runtestsuite(ip, port):
+
     test = ConnectTest(ip, port)
     test.createFile()
     test.connect()
@@ -21,7 +23,6 @@ def runtestsuite(ip, port):
     test = SpeedTest(ip, port)
     test.createFile()
     test.connect()
-
     filesize = test.fileSize()
     time_start = time.time()
     test.storCmd()
@@ -29,13 +30,11 @@ def runtestsuite(ip, port):
     msg = "time to upload file "
     data = "%s %f sec, speed %d MB/s" % (msg, delta, (filesize / delta))
     print(data)
-
     time_start = time.time()
     test.retrCmd()
     delta = (time.time() - time_start)
     data = "%s %f sec, speed %d MB/s" % (msg, delta, (filesize / delta))
     print(data)
-
     test.deleCmd()
     test.disconnect()
 
@@ -52,6 +51,14 @@ def runtestsuite(ip, port):
     test.binarymodeTest()
     test.deleTest()
     test.disconnect()
+
+    test = RenamefolderTest(ip, port)
+    test.connect()
+    test.mkdTest()
+    test.renameTest()
+    test.cleanfolderTest()
+    test.disconnect()
+
 
 def main(ip, port):
     runtestsuite(ip, port)
