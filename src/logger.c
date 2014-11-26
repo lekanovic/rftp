@@ -26,6 +26,8 @@ void filelog(int client_fd, char* cmd)
     tmp = asctime(localtime(&ltime));
     tmp[strlen(tmp) - 1] = 0;
 
+    rm_crlf(cmd);
+
     sprintf(buffer,"|%s|%s|%s|\n",tmp,ipstr,cmd);
 
     fputs(buffer,logfile);
