@@ -28,8 +28,6 @@ void filelog(int client_fd, char* cmd)
 
     sprintf(buffer,"|%s|%s|%s|\n",tmp,ipstr,cmd);
 
-    printf(buffer);
-
     fputs(buffer,logfile);
 }
 void closelogfile()
