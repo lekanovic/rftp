@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include "helpers.h"
 #include "config_parser.h"
+#include "logger.h"
 
 #define NOT_FOUND	-1
 
@@ -118,6 +119,7 @@ void initialize_system(struct configs* cfg)
 {
 	create_ini_file(cfg);
 	init_dir(cfg->server_dir);
+    initlogfile(cfg);
 }
 int init_dir(const char* server_dir)
 {
@@ -268,11 +270,6 @@ int rm_crlf(char* str)
 	}
 
 	return ret;
-}
-int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
-{
-	return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
-	((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
 }
 
 void replace(char*ip)

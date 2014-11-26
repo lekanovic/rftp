@@ -20,6 +20,7 @@
 #include "ftp_msg.h"
 #include "login.h"
 #include "debug_print.h"
+#include "logger.h"
 
 #define BUF_SIZE	1024
 #define USER_NAME_LEN	30
@@ -109,6 +110,7 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 	while (1) {
 		if ((bytes = ftp_recv(cmd_port,msg,BUF_SIZE,0)) == 0) {
 			printf("Client closed connection\n");
+            filelog(cmd_port,msg);
 			return 0;
 		}
 		if (strstr(msg,"USER") != NULL) {
@@ -116,6 +118,7 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 				if ( strstr(msg,"USER anonymous") != NULL) {
 					setup_user_env(cfg.server_dir);
 					ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
+                    filelog(cmd_port,"USER anonymous");
 					return 1;
 				}
 			}
@@ -125,8 +128,10 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 				return 0;
 			}
 		} else if ( strstr(msg,"PASS") != NULL) {
-			if (handle_pass(&in) == WRONG_PASSWD)
+			if (handle_pass(&in) == WRONG_PASSWD) {
+                filelog(cmd_port,"Wrong password");
 				return 0;
+            }
 			else {
 				int userId = setup_user_env(cfg.server_dir);
 
@@ -158,6 +163,7 @@ int handle_msg(int client_sfd,struct configs cfg)
 	while(response != END_CONNECTION) {
 		if ((bytes = ftp_recv(client_sfd,buf,BUF_SIZE,0)) == 0) {
 			printf("Client closed connection\n");
+            filelog(client_sfd,"Client closed connection\n");
 			return 0;
 		}
 		response = parse_msg(client_sfd,buf,user_name);
@@ -182,6 +188,7 @@ static int parse_msg(int client_sfd,char* msg,char* user_name)
 		if ( strstr(msg,ftp_cmds[i].cmd) != NULL &&
 			ftp_cmds[i].func_ptr != NULL) {
 			ret = ftp_cmds[i].func_ptr(&in);
+            filelog(client_sfd,msg);
 			break;
 
 		}
