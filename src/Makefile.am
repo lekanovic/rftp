@@ -5,7 +5,7 @@
 bin_PROGRAMS = rftpserver
 
 rftpserver_LDFLAGS = -pthread
-rftpserver_LDADD = -lcrypt libiniparser.i686.a
+rftpserver_LDADD = -lcrypt libiniparser.x86_64.a
 
 rftpserver_SOURCES = \
 	connect.c \
@@ -18,6 +18,8 @@ rftpserver_SOURCES = \
 	setup.c \
 	time_op.c \
 	config_parser.c \
+    logger.c \
+    logger.h \
 	config_parser.h \
 	connect.h \
 	debug_print.h \
