@@ -4,6 +4,7 @@ struct configs
 {
 	int disable_nagle_algorithm;
 	char* server_dir;
+    char* log_file;
 	int allow_anonymous_login;
 	int port;
 };

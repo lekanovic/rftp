@@ -39,6 +39,8 @@ void create_ini_file(struct configs* cfg)
 		"\n"
 		"ServerHomeDir = %s/publish ;"
 		"\n"
+        "LogFile = logfile.log ;"
+		"\n"
 		"\n"
 		"[Settings]\n"
 		"\n"
@@ -60,6 +62,7 @@ int parse_ini_file(char * ini_name,struct configs* cfg)
 
 	/* Some temporary variables to hold query results */
 	char *home_dir;
+    char *log_file;
 
 	ini = iniparser_load(ini_name);
 
@@ -72,6 +75,8 @@ int parse_ini_file(char * ini_name,struct configs* cfg)
 
 	home_dir = iniparser_getstring(ini,
 					"Directory:ServerHomeDir", NULL);
+    log_file = iniparser_getstring(ini,
+					"Directory:LogFile", NULL);
 	cfg->disable_nagle_algorithm = iniparser_getboolean(ini,
 					"Settings:UseNagles", -1);
 	cfg->allow_anonymous_login = iniparser_getboolean(ini,
@@ -81,6 +86,9 @@ int parse_ini_file(char * ini_name,struct configs* cfg)
 
 	memset(cfg->server_dir,0,DIR_LENGTH);
 	strcpy(cfg->server_dir,home_dir);
+
+    memset(cfg->log_file,0,FILENAME_MAX);
+    strcpy(cfg->log_file,log_file);
 
 	iniparser_freedict(ini);
 	return 0 ;
