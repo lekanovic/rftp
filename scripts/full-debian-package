@@ -1,0 +1,115 @@
+#!/bin/bash
+
+mkdir -p debian/DEBIAN
+mkdir -p debian/etc/init.d
+mkdir -p debian/usr/local/bin
+mkdir -p debian/usr/local/lib
+mkdir -p debian/usr/share/man/man1
+
+VERSION=$1
+DATE=$(date)
+OBJ_COPY="objcopy --strip-debug --strip-unneeded"
+
+# Create postinst file
+cat > debian/DEBIAN/postinst <<-EOF
+ldconfig
+update-rc.d -f rftp-init defaults
+service rftp-init start
+EOF
+
+# Create postrm file
+cat > debian/DEBIAN/postrm <<-EOF
+service rftp-init stop
+update-rc.d -f rftp-init remove
+if [ "\$1" = "remove" ]; then
+    ldconfig
+fi
+EOF
+
+# Create prerm file
+cat > debian/DEBIAN/prerm <<-EOF
+service rftp-init stop
+EOF
+
+# Create changelog
+cat > debian/changelog <<-EOF
+rftp ($VERSION) stable; urgency=low
+
+  * Initial release. (Closes: #XXXXXX)
+
+ -- rftp <lekanovoic@gmail.com>  Tue, 22 Jul 2014 15:37:46 -0700
+EOF
+
+# Create compat file
+cat > debian/compat <<-EOF
+8
+EOF
+
+cat > debian/etc/init.d/rftp-init <<-EOF
+### BEGIN INIT INFO
+# Provides:          rftpserver
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+#!/bin/sh
+
+# See how we were called.
+case "\$1" in
+
+    start)
+        echo "Starting rftpserver.."
+        rftpserver &
+        ;;
+
+    stop)
+        echo "Stopping rftpserver.."
+        pkill rftpserver
+        ;;
+
+    force-reload)
+        echo "Force reload.."
+        ;;
+
+    restart)
+        echo "Restarting rftpserver.."
+        $0 stop
+        $0 start
+        ;;
+esac
+EOF
+
+# Copy binaries
+$OBJ_COPY src/rftpserver debian/usr/local/bin/rftpserver
+$OBJ_COPY src/libiniparser.x86_64.a debian/usr/local/lib/libiniparser.x86_64.a
+$OBJ_COPY src/libiniparser.i686.a debian/usr/local/lib/libiniparser.i686.a
+
+# Create control file
+PACKAGE_SIZE=$(du -ks debian/usr|cut -f 1)
+cat > debian/DEBIAN/control <<-EOF
+Package: rftp
+Version: $VERSION
+Architecture: amd64
+Maintainer: lekanovic <lekanovic@gmail.com>
+Installed-Size: $PACKAGE_SIZE
+Section: devel
+Priority: optional
+Depends: libcrypt,libpthread
+Description: Small ftp server
+ rftp is an small and fast ftp server.
+EOF
+
+# Set correct permission
+chmod 755 -R debian
+chown -R root debian
+
+# Create md5sum file
+pushd debian
+$(find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > DEBIAN/md5sums)
+popd
+
+dpkg-deb -b debian v$VERSION-rftp.deb
