@@ -71,7 +71,7 @@ int start_server()
 	struct hostent *he;
 	struct configs cfg;
 	cfg.server_dir = ftp_alloc(DIR_LENGTH);
-    cfg.log_file = ftp_alloc(FILENAME_MAX);
+	cfg.log_file = ftp_alloc(FILENAME_MAX);
 
 	if ((sfd = socket(AF_INET,SOCK_STREAM,0)) < 0)
 		ERR("socket\n");
@@ -102,7 +102,6 @@ again:
 		goto again;
 	}
 
-
 	if (listen(sfd,5) < 0)
 		ERR("listen\n");
 
@@ -113,7 +112,7 @@ again:
 	close(sfd);
 
 	ftp_free(cfg.server_dir);
-    ftp_free(cfg.log_file);
+	ftp_free(cfg.log_file);
 }
 
 void close_server()
