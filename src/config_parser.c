@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "iniparser.h"
 #include "helpers.h"
@@ -13,7 +14,7 @@ int  parse_ini_file(char *,struct configs* cfg);
 
 void create_ini_file(struct configs* cfg)
 {
-	char cwd[1024];
+	char cwd[PATH_MAX];
 	FILE    *   ini ;
 
 	if (file_exist(CONFIG_FILE)){
@@ -75,7 +76,7 @@ int parse_ini_file(char * ini_name,struct configs* cfg)
 
 	home_dir = iniparser_getstring(ini,
 					"Directory:ServerHomeDir", NULL);
-    log_file = iniparser_getstring(ini,
+	log_file = iniparser_getstring(ini,
 					"Directory:LogFile", NULL);
 	cfg->disable_nagle_algorithm = iniparser_getboolean(ini,
 					"Settings:UseNagles", -1);
@@ -87,8 +88,8 @@ int parse_ini_file(char * ini_name,struct configs* cfg)
 	memset(cfg->server_dir,0,DIR_LENGTH);
 	strcpy(cfg->server_dir,home_dir);
 
-    memset(cfg->log_file,0,FILENAME_MAX);
-    strcpy(cfg->log_file,log_file);
+	memset(cfg->log_file,0,FILENAME_MAX);
+	strcpy(cfg->log_file,log_file);
 
 	iniparser_freedict(ini);
 	return 0 ;
