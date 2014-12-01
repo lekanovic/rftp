@@ -99,6 +99,7 @@ struct ftp_cmd_func ftp_cmds[] = {
 static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 {
 	char msg[BUF_SIZE];
+	char log[100];
 	int bytes;
 	struct req_input in;
 	in.client_fd = cmd_port;
@@ -106,6 +107,7 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 	in.msg = msg;
 
 	memset(msg,0,BUF_SIZE);
+	memset(log,0,100);
 
 	while (1) {
 		if ((bytes = ftp_recv(cmd_port,msg,BUF_SIZE,0)) == 0) {
@@ -125,6 +127,8 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 
 			if (handle_user(&in) == NO_USER) {
 				DEBUG_PRINT(cmd_port,"%s is trying to login\n",user_name);
+				sprintf(log,"No user %s found",user_name);
+				filelog(cmd_port,log);
 				return 0;
 			}
 		} else if ( strstr(msg,"PASS") != NULL) {
@@ -136,14 +140,17 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 				int userId = setup_user_env(cfg.server_dir);
 
 				DEBUG_PRINT(cmd_port,"SetUid=%d for %s\n",userId,user_name);
-
+				sprintf(log,"%s logged in",user_name);
+				filelog(cmd_port,log);
 				return 1;
 			}
 		}  else if ( strstr(msg,"FEAT") != NULL) {
 			handle_feat(&in);
+			filelog(cmd_port,msg);
 		}
 
 		memset(msg,0,BUF_SIZE);
+		memset(log,0,100);
 	}
 }
 
@@ -157,13 +164,14 @@ int handle_msg(int client_sfd,struct configs cfg)
 
 	if (!verify_login(client_sfd,user_name,cfg)){
 		ftp_send(client_sfd,GOODBYE,strlen(GOODBYE),0);
+		filelog(client_sfd,"Failed to login");
 		return 0;
 	}
 
 	while(response != END_CONNECTION) {
 		if ((bytes = ftp_recv(client_sfd,buf,BUF_SIZE,0)) == 0) {
 			printf("Client closed connection\n");
-            filelog(client_sfd,"Client closed connection\n");
+			filelog(client_sfd,"Client closed connection");
 			return 0;
 		}
 		response = parse_msg(client_sfd,buf,user_name);
