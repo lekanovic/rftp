@@ -112,7 +112,7 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 	while (1) {
 		if ((bytes = ftp_recv(cmd_port,msg,BUF_SIZE,0)) == 0) {
 			printf("Client closed connection\n");
-            filelog(cmd_port,msg);
+			filelog(cmd_port,msg);
 			return 0;
 		}
 		if (strstr(msg,"USER") != NULL) {
@@ -120,7 +120,7 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 				if ( strstr(msg,"USER anonymous") != NULL) {
 					setup_user_env(cfg.server_dir);
 					ftp_send(cmd_port,LOG_IN_OK,strlen(LOG_IN_OK),0);
-                    filelog(cmd_port,"USER anonymous");
+					filelog(cmd_port,"USER anonymous");
 					return 1;
 				}
 			}
@@ -133,7 +133,7 @@ static int verify_login(int cmd_port, char* user_name,struct configs cfg)
 			}
 		} else if ( strstr(msg,"PASS") != NULL) {
 			if (handle_pass(&in) == WRONG_PASSWD) {
-                filelog(cmd_port,"Wrong password");
+				filelog(cmd_port,"Wrong password");
 				return 0;
             }
 			else {
