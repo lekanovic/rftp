@@ -1,3 +1,6 @@
+# packages
+sudo apt-get install autoconf libtool
+
 # http://www.niksula.hut.fi/~mkomu/docs/autohowto.html
 
 # ./autogen.sh - creates e.g. the configure script
